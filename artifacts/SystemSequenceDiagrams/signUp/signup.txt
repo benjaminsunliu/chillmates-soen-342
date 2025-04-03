@@ -1,0 +1,19 @@
+//www.plantuml.com/plantuml/png/bP6_JWCn3CRtF8NLgQtQFi09LPL0I0nqwuGOJCuzHUHFbDWWtfucfL6Wwi2Mx_ppvy_dNMPCBCugr1mIp0wPqWmmGzL5gOY9ZJOHFSFiJhR3ayziMDW4Nz5EAnsi9LsU-GmN2xX7HXkcIXz-nBLlcrqUrqwj_2oMJMLKImdhRPzZW6mcBt5E3erTWGwUKVCADflDGdLWwRia6k23aZb-FKYaS-D2NMgm_ZlWBGGBumdT1tuCuiVRjYyzzgeJ8LC9VPKkCxBach8VlOL2mt8vW0pWy9tszFa_W_RF1i1ndCj2jI-mxiCMhwD93iiQjzV_ZNMLIhQpdEy04Y6I7usVm57EE97QdRGu-mq0
+
+@startuml
+actor "User" as actorUser
+participant "<u>:Institution" as Institution
+collections "<u>:User Catalog" as UCatalog
+participant "<u>:User" as User
+collections "<u>:User" as MultiUser
+
+actorUser -> Institution: signup(email, contact, ...)
+Institution -> UCatalog: verifyDupe(email)
+UCatalog --> Institution: bool dupeNotFound
+Institution -> UCatalog: [dupeNotFound]createUser(email, contact, status, ...)
+UCatalog -> User **: u: makeNewUser(email, contact, status, ...)
+UCatalog -> MultiUser: add(u)
+MultiUser --> UCatalog: confirmation
+UCatalog --> Institution: confirmation
+Institution --> actorUser: sign up pending message
+@enduml
