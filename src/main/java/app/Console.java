@@ -12,7 +12,7 @@ import app.users.Client;
 import app.users.Expert;
 import app.users.User;
 
-import javax.sound.midi.SysexMessage;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.List;
 import java.time.format.DateTimeParseException;
@@ -51,7 +51,7 @@ public class Console {
             expertMenu();
         } else if (this.currentUser instanceof Client){
             if (((Client) this.currentUser).getStatus()) {
-                //clientMenu();
+                clientMenu();
             } else {
                 System.out.println("Your account is not approved yet. Please wait for an administrator to approve your account.");
                 mainMenu();
@@ -211,6 +211,384 @@ public class Console {
                 adminMenu();
         }
     }
+    public void expertMenu(){
+        System.out.println("-------------------------");
+        System.out.println("Expert Menu:");
+        System.out.println("1. View Institution Information");
+        System.out.println("2. Availability Management");
+        System.out.println("3. Accept Service Requests");
+        System.out.println("4. View your Service Requests");
+        System.out.println("5. Cancel Service Requests");
+        System.out.println("6. Logout");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                viewInstitutionInformation();
+                break;
+            case "2":
+                manageExpertAvailability((Expert) this.currentUser);
+                break;
+            case "3":
+                viewRequestsWithoutExpert();
+                break;
+            case "4":
+                viewExpertRequests((Expert) this.currentUser);
+                break;
+            case "5":
+                cancelServiceRequest((Expert) this.currentUser);
+                break;
+            case "6":
+                this.currentUser = null;
+                mainMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                expertMenu();
+        }
+    }
+    private void clientMenu() {
+        System.out.println("-------------------------");
+        System.out.println("Client Menu:");
+        System.out.println("1. View Institution Information");
+        System.out.println("2. View Service Requests");
+        System.out.println("3. Create Service Request");
+        System.out.println("4. Cancel Service Request");
+        System.out.println("5. Logout");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                viewInstitutionInformation();
+                break;
+            case "2":
+                viewClientServiceRequests((Client) this.currentUser);
+                break;
+            case "3":
+                createServiceRequest();
+                break;
+            case "4":
+                cancelClientServiceRequest((Client) this.currentUser);
+                break;
+            case "5":
+                this.currentUser = null;
+                mainMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                clientMenu();
+        }
+    }
+
+    private void cancelServiceRequest(Expert currentUser) {
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        List<ServiceRequest> expertRequests = new ArrayList<>();
+
+        for (ServiceRequest request : serviceRequests) {
+            if (request.getAssignedExpert() != null && request.getAssignedExpert().equals(currentUser)) {
+                expertRequests.add(request);
+            }
+        }
+
+        if (expertRequests.isEmpty()) {
+            System.out.println("No service requests assigned to you.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            expertMenu();
+            return;
+        }
+
+        System.out.println("Your Service Requests:");
+        for (int i = 0; i < expertRequests.size(); i++) {
+            ServiceRequest request = expertRequests.get(i);
+            System.out.printf("%d. %s - Requested by: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getRequestingClient().getEmail(),
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
+        }
+        System.out.println("Select a service request to cancel or press 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            expertMenu();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            expertMenu();
+            return;
+        }
+        if (index < 0 || index >= expertRequests.size()) {
+            System.out.println("Selection out of range. Try again.");
+            expertMenu();
+            return;
+        }
+        ServiceRequest selectedServiceRequest = expertRequests.get(index);
+        serviceRequestMapper.delete(selectedServiceRequest);
+        System.out.println("Service request cancelled successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        expertMenu();
+    }
+
+    private void viewExpertRequests(Expert currentUser) {
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        List<ServiceRequest> expertRequests = new ArrayList<>();
+
+        for (ServiceRequest request : serviceRequests) {
+            if (request.getAssignedExpert() != null && request.getAssignedExpert().equals(currentUser)) {
+                expertRequests.add(request);
+            }
+        }
+
+        if (expertRequests.isEmpty()) {
+            System.out.println("No service requests assigned to you.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            expertMenu();
+            return;
+        }
+
+        System.out.println("Your Service Requests:");
+        for (int i = 0; i < expertRequests.size(); i++) {
+            ServiceRequest request = expertRequests.get(i);
+            System.out.printf("%d. %s - Requested by: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getRequestingClient().getEmail(),
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        expertMenu();
+    }
+
+    private void viewRequestsWithoutExpert() {
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        List<ServiceRequest> unassignedRequests = new ArrayList<>();
+
+        for (ServiceRequest request : serviceRequests) {
+            if (request.getAssignedExpert() == null) {
+                unassignedRequests.add(request);
+            }
+        }
+
+        if (unassignedRequests.isEmpty()) {
+            System.out.println("No unassigned service requests found.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            expertMenu();
+            return;
+        }
+
+        System.out.println("Service Requests:");
+        for (int i = 0; i < unassignedRequests.size(); i++) {
+            ServiceRequest request = unassignedRequests.get(i);
+            System.out.printf("%d. %s - Requested by: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getRequestingClient().getEmail(),
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
+        }
+        System.out.println("Select a service request to assign to yourself or press 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            expertMenu();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            expertMenu();
+            return;
+        }
+        if (index < 0 || index >= unassignedRequests.size()) {
+            System.out.println("Selection out of range. Try again.");
+            expertMenu();
+            return;
+        }
+        ServiceRequest selectedServiceRequest = unassignedRequests.get(index);
+        selectedServiceRequest.setAssignedExpert((Expert) this.currentUser);
+        serviceRequestMapper.update(selectedServiceRequest);
+        System.out.println("Service request assigned to yourself successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        expertMenu();
+    }
+
+
+
+    private void cancelClientServiceRequest(Client currentUser) {
+        System.out.println("-------------------------");
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        List<ServiceRequest> clientRequests = new ArrayList<>();
+        for (ServiceRequest request : serviceRequests) {
+            if (request.getRequestingClient() != null && request.getRequestingClient().equals(currentUser)) {
+                clientRequests.add(request);
+            }
+        }
+        if (clientRequests.isEmpty()) {
+            System.out.println("No service requests found for you.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            clientMenu();
+            return;
+        }
+        System.out.println("Your Service Requests:");
+        for (int i = 0; i < clientRequests.size(); i++) {
+            ServiceRequest request = clientRequests.get(i);
+            System.out.printf("%d. %s - Assigned Expert: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getAssignedExpert() != null ? request.getAssignedExpert().getEmail() : "Not assigned",
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
+        }
+        System.out.println("Select a service request to cancel or press 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            clientMenu();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            clientMenu();
+            return;
+        }
+        if (index < 0 || index >= clientRequests.size()) {
+            System.out.println("Selection out of range. Try again.");
+            clientMenu();
+            return;
+        }
+        ServiceRequest selectedServiceRequest = clientRequests.get(index);
+        selectedServiceRequest.getAssignedExpert().getServiceRequests().remove(selectedServiceRequest);
+        selectedServiceRequest.getRequestingClient().getServiceRequests().remove(selectedServiceRequest);
+        serviceRequestMapper.delete(selectedServiceRequest);
+        System.out.println("Service request cancelled successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        clientMenu();
+    }
+
+    private void createServiceRequest() {
+        List<Availability> availabilities = availabilitymapper.findAll();
+        if (availabilities.isEmpty()) {
+            System.out.println("No availabilities found.");
+            clientMenu();
+            return;
+        }
+        System.out.println("Select an availability:");
+        for (int i = 0; i < availabilities.size(); i++) {
+            Availability availability = availabilities.get(i);
+            System.out.printf("%d. %s%n", i + 1, availability.toString());
+        }
+        System.out.println("Enter the number of the availability, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            clientMenu();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            clientMenu();
+            return;
+        }
+        if (index < 0 || index >= availabilities.size()) {
+            System.out.println("Selection out of range. Try again.");
+            clientMenu();
+            return;
+        }
+        Availability selectedAvailability = availabilities.get(index);
+        System.out.println("Enter the request type:");
+        String requestType = scanner.nextLine().trim();
+        System.out.println("Select a time slot:");
+        List<TimeSlot> timeSlots = selectedAvailability.getTimeSlots();
+        if (timeSlots.isEmpty()) {
+            System.out.println("No time slots available for this availability.");
+            clientMenu();
+            return;
+        }
+        for (int i = 0; i < timeSlots.size(); i++) {
+            TimeSlot timeSlot = timeSlots.get(i);
+            System.out.printf("%d. %s - %s%n", i + 1, timeSlot.getStartTime(), timeSlot.getEndTime());
+        }
+        System.out.println("Enter the number of the time slot, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            clientMenu();
+            return;
+        }
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            clientMenu();
+            return;
+        }
+        if (index < 0 || index >= timeSlots.size()) {
+            System.out.println("Selection out of range. Try again.");
+            clientMenu();
+            return;
+        }
+        TimeSlot selectedTimeSlot = timeSlots.get(index);
+        ServiceRequest serviceRequest = new ServiceRequest(requestType, (Client) this.currentUser, selectedTimeSlot);
+        serviceRequestMapper.create(serviceRequest);
+        selectedTimeSlot.setServiceRequests(serviceRequest);
+        timeSlotMapper.update(selectedTimeSlot);
+        System.out.println("Service request created successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        clientMenu();
+    }
+
+    private void viewClientServiceRequests(Client currentUser) {
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        List<ServiceRequest> clientRequests = new ArrayList<>();
+
+        for (ServiceRequest request : serviceRequests) {
+            if (request.getRequestingClient() != null && request.getRequestingClient().equals(currentUser)) {
+                clientRequests.add(request);
+            }
+        }
+
+        if (clientRequests.isEmpty()) {
+            System.out.println("No service requests found for you.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            clientMenu();
+            return;
+        }
+
+        System.out.println("Your Service Requests:");
+        for (int i = 0; i < clientRequests.size(); i++) {
+            ServiceRequest request = clientRequests.get(i);
+            System.out.printf("%d. %s - Assigned Expert: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getAssignedExpert() != null ? request.getAssignedExpert().getEmail() : "Not assigned",
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        clientMenu();
+    }
 
     private void serviceRequestManagement() {
         System.out.println("-------------------------");
@@ -278,6 +656,8 @@ public class Console {
             return;
         }
         ServiceRequest selectedServiceRequest = serviceRequests.get(index);
+        selectedServiceRequest.getAssignedExpert().getServiceRequests().remove(selectedServiceRequest);
+        selectedServiceRequest.getRequestingClient().getServiceRequests().remove(selectedServiceRequest);
         serviceRequestMapper.delete(selectedServiceRequest);
         System.out.println("Service request deleted successfully.");
         System.out.println("Press Enter to go back.");
@@ -556,7 +936,12 @@ public class Console {
         System.out.println("\nService Requests:");
         for (int i = 0; i < serviceRequests.size(); i++) {
             ServiceRequest request = serviceRequests.get(i);
-            System.out.printf(request.toString());
+            System.out.printf("%d. %s - Assigned Expert: %s - TimeSlot: %s to %s%n",
+                    i + 1,
+                    request.getRequestType(),
+                    request.getAssignedExpert() != null ? request.getAssignedExpert().getEmail() : "Not assigned",
+                    request.getTimeSlot().getStartTime(),
+                    request.getTimeSlot().getEndTime());
         }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -1347,34 +1732,6 @@ public class Console {
         System.out.println("Object of interest created successfully.");
         adminMenu();
     }
-
-    public void expertMenu(){
-        System.out.println("-------------------------");
-        System.out.println("Expert Menu:");
-        System.out.println("1. View Institution Information");
-        System.out.println("2. Availability Management");
-        System.out.println("3. Logout");
-        System.out.println("-------------------------");
-        System.out.println("Enter your choice:");
-        String choice = scanner.nextLine().trim();
-        switch(choice){
-            case "1":
-                viewInstitutionInformation();
-                break;
-            case "2":
-                manageExpertAvailability((Expert) this.currentUser);
-                break;
-            case "3":
-                this.currentUser = null;
-                mainMenu();
-                break;
-            default:
-                System.out.println("Invalid choice. Please try again.");
-                expertMenu();
-        }
-    }
-
-
 
     private void viewInstitutionInformation() {
         System.out.println("-------------------------");

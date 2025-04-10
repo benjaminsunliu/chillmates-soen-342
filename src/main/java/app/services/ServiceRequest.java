@@ -30,6 +30,11 @@ public class ServiceRequest {
         this.requestingClient = requestingClient;
         this.timeSlot = timeSlot;
     }
+    public ServiceRequest(String requestType, Client requestingClient, TimeSlot timeSlot) {
+        this.requestType = requestType;
+        this.requestingClient = requestingClient;
+        this.timeSlot = timeSlot;
+    }
 
     public ServiceRequest() {
 

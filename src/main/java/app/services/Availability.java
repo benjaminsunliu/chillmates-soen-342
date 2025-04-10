@@ -41,10 +41,19 @@ public class Availability {
 
     @Override
     public String toString() {
-        return "Expert: " + this.expert + "\nTime Slots: " + this.timeSlots;
+        return "\tExpert: " + this.expert.getEmail() + " - Time Slots: " + this.timeSlots;
     }
 
     public Long getId() {
         return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public Expert getExpert() {
+        return expert;
+    }
+    public void setExpert(Expert expert) {
+        this.expert = expert;
     }
 }
