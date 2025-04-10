@@ -38,6 +38,12 @@ public class Viewing {
     public void setAuction(Auction auction) {
         this.auction = auction;
     }
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
     @Override
     public String toString() {

@@ -20,4 +20,17 @@ public class InstitutionMapper extends DataMapper {
 
         return objectsByInstitution;
     }
+
+    public Institution findByName(String institutionName) {
+        TypedQuery<Institution> query = entityManager.createQuery(
+                "SELECT i FROM Institution i WHERE i.name = :name", Institution.class);
+        query.setParameter("name", institutionName);
+        List<Institution> institutions = query.getResultList();
+
+        if (institutions.isEmpty()) {
+            return null;
+        } else {
+            return institutions.get(0);
+        }
+    }
 }

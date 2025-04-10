@@ -18,6 +18,7 @@ public class TimeSlot {
     private Availability availability;
 
     @OneToOne(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "service_request_id")
     private ServiceRequest serviceRequest;
 
     public TimeSlot(LocalDateTime startTime, LocalDateTime endTime) {

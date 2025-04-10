@@ -62,7 +62,7 @@ public class ServiceRequest {
     }
 
     public String toString() {
-        return "Service Request ID: " + this.id + "\nRequest Type: " + this.requestType + "\nAssigned Expert: "  + this.assignedExpert.getEmail() + "\nRequesting Client: " + this.requestingClient.getEmail() + "\nTime Slot: " + this.timeSlot.toString();
+        return "Service Request ID: " + this.id + "\n\t- Request Type: " + this.requestType + "\n\t- Assigned Expert: "  + this.assignedExpert.getEmail() + "\n\t- Requesting Client: " + this.requestingClient.getEmail() + "\n\t- Time Slot: " + this.timeSlot.toString() + "\n";
     }
 
     public void setId(Long id) {

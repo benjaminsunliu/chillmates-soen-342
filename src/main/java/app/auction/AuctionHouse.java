@@ -1,8 +1,5 @@
 package app.auction;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.util.List;
 
@@ -14,7 +11,7 @@ public class AuctionHouse {
     @GeneratedValue
     private Long id;
 
-    @OneToMany(mappedBy = "auctionHouse")
+    @OneToMany(mappedBy = "auctionHouse", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Auction> auctions;
 
     public AuctionHouse(String name, String location) {
@@ -57,4 +54,15 @@ public class AuctionHouse {
         this.auctions.add(auction);
         auction.setAuctionHouse(this); // Assuming Auction has a setAuctionHouse method
     }
+    public void removeAuction(Auction auction) {
+        this.auctions.remove(auction);
+        auction.setAuctionHouse(null); // Assuming Auction has a setAuctionHouse method
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
 }

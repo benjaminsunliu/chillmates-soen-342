@@ -20,4 +20,10 @@ public class AuctionHouseMapper extends DataMapper{
 
         return auctionsByHouse;
     }
+
+    public List<AuctionHouse> findAll() {
+        TypedQuery<AuctionHouse> query = entityManager.createQuery(
+                "SELECT ah FROM AuctionHouse ah", AuctionHouse.class);
+        return query.getResultList();
+    }
 }

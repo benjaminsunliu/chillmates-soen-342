@@ -67,6 +67,15 @@ public class Institution {
     public List<ObjectOfInterest> getObjects() {
         return this.ownedObjects;
     }
+    public void setObjects(List<ObjectOfInterest> objects) {
+        this.ownedObjects = objects;
+    }
+    public ObjectOfInterest removeObject(ObjectOfInterest object) {
+        if (this.ownedObjects.remove(object)) {
+            return object;
+        }
+        return null;
+    }
 
 
     /*

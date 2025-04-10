@@ -1,5 +1,6 @@
 package app;
 import app.auction.Auction;
+import app.auction.AuctionHouse;
 import app.auction.ObjectOfInterest;
 import app.auction.Viewing;
 import app.mappers.*;
@@ -26,6 +27,9 @@ public class Console {
     private AvailabilityMapper availabilitymapper;
     private TimeSlotMapper timeSlotMapper;
     private ServiceRequestMapper serviceRequestMapper;
+    private ObjectMapper objectMapper;
+    private AuctionHouseMapper auctionHouseMapper;
+    private AuctionMapper auctionMapper;
 
     public Console(){
         this.scanner = new Scanner(System.in);
@@ -33,6 +37,9 @@ public class Console {
         this.availabilitymapper = new AvailabilityMapper();
         this.timeSlotMapper = new TimeSlotMapper();
         this.serviceRequestMapper = new ServiceRequestMapper();
+        this.objectMapper = new ObjectMapper();
+        this.auctionHouseMapper = new AuctionHouseMapper();
+        this.auctionMapper = new AuctionMapper();
     }
 
     public void run(){
@@ -181,19 +188,19 @@ public class Console {
                 userManagement();
                 break;
             case "2":
-                //objectOfInterestManagement();
+                objectOfInterestManagement();
                 break;
             case "3":
-                //auctionHouseManagement();
+                auctionHouseManagement();
                 break;
             case "4":
-                //auctionManagement();
+                auctionManagement();
                 break;
             case "5":
-                //viewingManagement();
+                viewingManagement();
                 break;
             case "6":
-                //serviceRequestManagement();
+                serviceRequestManagement();
                 break;
             case "7":
                 this.currentUser = null;
@@ -203,6 +210,1142 @@ public class Console {
                 System.out.println("Invalid choice. Please try again.");
                 adminMenu();
         }
+    }
+
+    private void serviceRequestManagement() {
+        System.out.println("-------------------------");
+        System.out.println("Service Request Management:");
+        System.out.println("1. Add Service Request");
+        System.out.println("2. Edit Service Request");
+        System.out.println("3. Delete Service Request");
+        System.out.println("4. View all Service Requests");
+        System.out.println("5. Go back");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                addServiceRequest();
+                break;
+            case "2":
+                editServiceRequest();
+                break;
+            case "3":
+                deleteServiceRequest();
+                break;
+            case "4":
+                viewAllServiceRequests();
+                break;
+            case "5":
+                adminMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                serviceRequestManagement();
+        }
+    }
+
+    private void deleteServiceRequest() {
+        System.out.println("-------------------------");
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        if (serviceRequests.isEmpty()) {
+            System.out.println("No service requests found.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("Select a service request to delete:");
+        for (int i = 0; i < serviceRequests.size(); i++) {
+            ServiceRequest request = serviceRequests.get(i);
+            System.out.printf("%d. %s%n", i + 1, request.toString());
+        }
+        System.out.println("Enter the number of the service request to delete, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            serviceRequestManagement();
+            return;
+        }
+        if (index < 0 || index >= serviceRequests.size()) {
+            System.out.println("Selection out of range. Try again.");
+            serviceRequestManagement();
+            return;
+        }
+        ServiceRequest selectedServiceRequest = serviceRequests.get(index);
+        serviceRequestMapper.delete(selectedServiceRequest);
+        System.out.println("Service request deleted successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        serviceRequestManagement();
+    }
+
+    private void editServiceRequest() {
+        System.out.println("-------------------------");
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        if (serviceRequests.isEmpty()) {
+            System.out.println("No service requests found.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("Select a service request to edit:");
+        for (int i = 0; i < serviceRequests.size(); i++) {
+            ServiceRequest request = serviceRequests.get(i);
+            System.out.printf("%d. %s%n", i + 1, request.toString());
+        }
+        System.out.println("Enter the number of the service request to edit, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            serviceRequestManagement();
+            return;
+        }
+        if (index < 0 || index >= serviceRequests.size()) {
+            System.out.println("Selection out of range. Try again.");
+            serviceRequestManagement();
+            return;
+        }
+        ServiceRequest selectedServiceRequest = serviceRequests.get(index);
+        System.out.printf("Editing service request: %s%n", selectedServiceRequest.toString());
+        System.out.println("Enter new request type (or press Enter to keep current):");
+        String newRequestType = scanner.nextLine().trim();
+        if (!newRequestType.isEmpty()) {
+            selectedServiceRequest.setRequestType(newRequestType);
+        }
+        List<Expert> experts = userMapper.findExperts();
+        if (experts.isEmpty()) {
+            System.out.println("No experts found.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("Select a new expert (or press Enter to keep current):");
+        for (int i = 0; i < experts.size(); i++) {
+            Expert expert = experts.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, expert.getEmail(), expert.getAreaOfExpertise());
+        }
+        System.out.println("Enter the number of the expert, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        if (!input.isEmpty()) {
+            try {
+                index = Integer.parseInt(input) - 1;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+                serviceRequestManagement();
+                return;
+            }
+            if (index < 0 || index >= experts.size()) {
+                System.out.println("Selection out of range. Try again.");
+                serviceRequestManagement();
+                return;
+            }
+            Expert selectedExpert = experts.get(index);
+            selectedServiceRequest.setAssignedExpert(selectedExpert);
+        }
+        List<Client> clients = userMapper.findClients();
+        if (clients.isEmpty()) {
+            System.out.println("No clients found.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("Select a new client (or press Enter to keep current):");
+        for (int i = 0; i < clients.size(); i++) {
+            Client client = clients.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, client.getEmail(), client.getAffiliation());
+        }
+        System.out.println("Enter the number of the client, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        if (!input.isEmpty()) {
+            try {
+                index = Integer.parseInt(input) - 1;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+                serviceRequestManagement();
+                return;
+            }
+            if (index < 0 || index >= clients.size()) {
+                System.out.println("Selection out of range. Try again.");
+                serviceRequestManagement();
+                return;
+            }
+            Client selectedClient = clients.get(index);
+            selectedServiceRequest.setRequestingClient(selectedClient);
+        }
+        List<TimeSlot> timeSlots = selectedServiceRequest.getAssignedExpert().getAvailability().getTimeSlots();
+        if (timeSlots.isEmpty()) {
+            System.out.println("No time slots available for this expert.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("Select a new time slot (or press Enter to keep current):");
+        for (int i = 0; i < timeSlots.size(); i++) {
+            TimeSlot timeSlot = timeSlots.get(i);
+            System.out.printf("%d. %s - %s%n", i + 1, timeSlot.getStartTime(), timeSlot.getEndTime());
+        }
+        System.out.println("Enter the number of the time slot, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        if (!input.isEmpty()) {
+            try {
+                index = Integer.parseInt(input) - 1;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+                serviceRequestManagement();
+                return;
+            }
+            if (index < 0 || index >= timeSlots.size()) {
+                System.out.println("Selection out of range. Try again.");
+                serviceRequestManagement();
+                return;
+            }
+            // Check if the time slot is already booked
+            if (timeSlots.get(index).getServiceRequest() != null) {
+                System.out.println("This time slot is already booked. Please select another one.");
+                serviceRequestManagement();
+                return;
+            }
+
+        }
+        TimeSlot selectedTimeSlot = timeSlots.get(index);
+        selectedServiceRequest.setTimeSlot(selectedTimeSlot);
+        serviceRequestMapper.update(selectedServiceRequest);
+        System.out.println("Service request updated successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        serviceRequestManagement();
+    }
+
+    private void addServiceRequest() {
+        System.out.println("-------------------------");
+        System.out.println("Enter the request type:");
+        String requestType = scanner.nextLine().trim();
+        System.out.println("Select an expert:");
+        List<Expert> experts = userMapper.findExperts();
+        if (experts.isEmpty()) {
+            System.out.println("No experts found.");
+            serviceRequestManagement();
+            return;
+        }
+        for (int i = 0; i < experts.size(); i++) {
+            Expert expert = experts.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, expert.getEmail(), expert.getAreaOfExpertise());
+        }
+        System.out.println("Enter the number of the expert, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            serviceRequestManagement();
+            return;
+        }
+        if (index < 0 || index >= experts.size()) {
+            System.out.println("Selection out of range. Try again.");
+            serviceRequestManagement();
+            return;
+        }
+        Expert selectedExpert = experts.get(index);
+
+        System.out.println("Select a time slot:");
+        List<TimeSlot> timeSlots = selectedExpert.getAvailability().getTimeSlots();
+        if (timeSlots.isEmpty()) {
+            System.out.println("No time slots available for this expert.");
+            serviceRequestManagement();
+            return;
+        }
+        for (int i = 0; i < timeSlots.size(); i++) {
+            TimeSlot timeSlot = timeSlots.get(i);
+            System.out.printf("%d. %s - %s%n", i + 1, timeSlot.getStartTime(), timeSlot.getEndTime());
+        }
+        System.out.println("Enter the number of the time slot, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            serviceRequestManagement();
+            return;
+        }
+        if (index < 0 || index >= timeSlots.size()) {
+            System.out.println("Selection out of range. Try again.");
+            serviceRequestManagement();
+            return;
+        }
+        TimeSlot timeSlot = timeSlots.get(index);
+        // Check if the time slot is already booked
+        if (timeSlot.getServiceRequest() != null) {
+            System.out.println("This time slot is already booked. Please select another one.");
+            serviceRequestManagement();
+            return;
+        }
+
+        List<Client> clients = userMapper.findClients();
+        Client selectedClient = null;
+        System.out.println("Select a client:");
+        for (int i = 0; i < clients.size(); i++) {
+            Client client = clients.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, client.getEmail(), client.getAffiliation());
+        }
+        System.out.println("Enter the number of the client, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            serviceRequestManagement();
+            return;
+        }
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            serviceRequestManagement();
+            return;
+        }
+        if (index < 0 || index >= clients.size()) {
+            System.out.println("Selection out of range. Try again.");
+            serviceRequestManagement();
+            return;
+        }
+        selectedClient = clients.get(index);
+
+        ServiceRequest serviceRequest = new ServiceRequest(requestType, selectedExpert, selectedClient, timeSlot);
+        serviceRequestMapper.create(serviceRequest);
+
+        System.out.println("Service request created successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        serviceRequestManagement();
+    }
+
+    private void viewAllServiceRequests() {
+        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
+        if (serviceRequests.isEmpty()) {
+            System.out.println("No service requests found.");
+            serviceRequestManagement();
+            return;
+        }
+        System.out.println("\nService Requests:");
+        for (int i = 0; i < serviceRequests.size(); i++) {
+            ServiceRequest request = serviceRequests.get(i);
+            System.out.printf(request.toString());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        serviceRequestManagement();
+    }
+
+    private void viewingManagement() {
+        System.out.println("-------------------------");
+        System.out.println("Viewing Management:");
+        System.out.println("1. Add Viewing");
+        System.out.println("2. Edit Viewing");
+        System.out.println("3. Delete Viewing");
+        System.out.println("4. View all viewings");
+        System.out.println("5. Go back");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                addViewing();
+                break;
+            case "2":
+                editViewing();
+                break;
+            case "3":
+                deleteViewing();
+                break;
+            case "4":
+                viewAllViewings();
+                break;
+            case "5":
+                adminMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                viewingManagement();
+        }
+    }
+
+    private void deleteViewing() {
+        System.out.println("-------------------------");
+        List<Viewing> viewings = auctionMapper.findAllViewings();
+        if (viewings.isEmpty()) {
+            System.out.println("No viewings found.");
+            viewingManagement();
+            return;
+        }
+        System.out.println("Select a viewing to delete:");
+        for (int i = 0; i < viewings.size(); i++) {
+            Viewing viewing = viewings.get(i);
+            System.out.printf("%d. %s Viewing (%s-%s) at %s %n", i + 1, viewing.getAuction().getAuctionType(), viewing.getStartTime(), viewing.getEndTime(), viewing.getAuction().getAuctionHouse().getName());
+        }
+        System.out.println("Enter the number of the viewing to delete, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            viewingManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            viewingManagement();
+            return;
+        }
+        if (index < 0 || index >= viewings.size()) {
+            System.out.println("Selection out of range. Try again.");
+            viewingManagement();
+            return;
+        }
+
+        Viewing selectedViewing = viewings.get(index);
+        Auction auction = selectedViewing.getAuction();
+        if (auction != null && auction.getViewing() == selectedViewing) {
+            auction.setViewing(null); // Detach the viewing
+            auctionMapper.update(auction); // Persist the change
+        }
+
+        auctionMapper.deleteViewing(selectedViewing); // Now safe to delete
+        System.out.println("Viewing deleted successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        viewingManagement();
+    }
+
+    private void editViewing() {
+        System.out.println("-------------------------");
+        List<Viewing> viewings = auctionMapper.findAllViewings();
+        if (viewings.isEmpty()) {
+            System.out.println("No viewings found.");
+            viewingManagement();
+            return;
+        }
+        System.out.println("Select a viewing to edit:");
+        for (int i = 0; i < viewings.size(); i++) {
+            Viewing viewing = viewings.get(i);
+            System.out.printf("%d. %s Viewing (%s-%s) at %s %n", i + 1, viewing.getAuction().getAuctionType(), viewing.getStartTime(), viewing.getEndTime(),viewing.getAuction().getAuctionHouse().getName());
+        }
+        System.out.println("Enter the number of the viewing to edit, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            viewingManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            viewingManagement();
+            return;
+        }
+        if (index < 0 || index >= viewings.size()) {
+            System.out.println("Selection out of range. Try again.");
+            viewingManagement();
+            return;
+        }
+        Viewing selectedViewing = viewings.get(index);
+        System.out.printf("Editing viewing: %s%n", selectedViewing.getAuction().getAuctionType());
+        System.out.println("Enter new start time (yyyy-MM-dd HH:mm) or press Enter to keep current:");
+        String newStartTimeInput = scanner.nextLine().trim();
+        if (!newStartTimeInput.isEmpty()) {
+            LocalDateTime newStartTime;
+            try {
+                newStartTime = LocalDateTime.parse(newStartTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+                viewingManagement();
+                return;
+            }
+            selectedViewing.setStartTime(newStartTime);
+        }
+        System.out.println("Enter new end time (yyyy-MM-dd HH:mm) or press Enter to keep current:");
+        String newEndTimeInput = scanner.nextLine().trim();
+        if (!newEndTimeInput.isEmpty()) {
+            LocalDateTime newEndTime;
+            try {
+                newEndTime = LocalDateTime.parse(newEndTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+                viewingManagement();
+                return;
+            }
+            selectedViewing.setEndTime(newEndTime);
+        }
+        auctionMapper.updateViewing(selectedViewing);
+        System.out.println("Viewing updated successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        viewingManagement();
+    }
+
+    private void addViewing() {
+        System.out.println("-------------------------");
+        List<Auction> auctions = auctionMapper.findAll();
+        if (auctions.isEmpty()) {
+            System.out.println("No auctions found. Please create an auction first.");
+            auctionManagement();
+            return;
+        }
+        System.out.println("Select an auction:");
+        for (int i = 0; i < auctions.size(); i++) {
+            Auction auction = auctions.get(i);
+            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+        }
+        System.out.println("Enter the number of the auction, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            viewingManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            viewingManagement();
+            return;
+        }
+        if (index < 0 || index >= auctions.size()) {
+            System.out.println("Selection out of range. Try again.");
+            viewingManagement();
+            return;
+        }
+        Auction selectedAuction = auctions.get(index);
+        if (selectedAuction.getViewing() != null) {
+            System.out.println("This auction already has a viewing scheduled.");
+            viewingManagement();
+            return;
+        }
+        System.out.println("Enter start time (yyyy-MM-dd HH:mm):");
+        String startTimeInput = scanner.nextLine().trim();
+        LocalDateTime startTime;
+        try {
+            startTime = LocalDateTime.parse(startTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+            viewingManagement();
+            return;
+        }
+
+        System.out.println("Enter end time (yyyy-MM-dd HH:mm):");
+        String endTimeInput = scanner.nextLine().trim();
+        LocalDateTime endTime;
+        try {
+            endTime = LocalDateTime.parse(endTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+            viewingManagement();
+            return;
+        }
+
+        Viewing viewing = new Viewing(startTime, endTime, selectedAuction);
+        selectedAuction.setViewing(viewing);
+        auctionMapper.createViewing(viewing);
+        auctionMapper.update(selectedAuction);
+        System.out.println("Viewing created successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        viewingManagement();
+    }
+
+    private void viewAllViewings() {
+        List<Viewing> viewings = auctionMapper.findAllViewings();
+        if (viewings.isEmpty()) {
+            System.out.println("No viewings found.");
+            viewingManagement();
+            return;
+        }
+        System.out.println("\nViewings:");
+        for (int i = 0; i < viewings.size(); i++) {
+            Viewing viewing = viewings.get(i);
+            System.out.printf("%d. %s Viewing (%s-%s) at %s %n", i + 1, viewing.getAuction().getAuctionType(), viewing.getStartTime(), viewing.getEndTime(),viewing.getAuction().getAuctionHouse().getName());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        viewingManagement();
+    }
+
+    private void auctionManagement() {
+        System.out.println("-------------------------");
+        System.out.println("Auction Management:");
+        System.out.println("1. Add Auction");
+        System.out.println("2. Edit Auction");
+        System.out.println("3. Delete Auction");
+        System.out.println("4. View all auctions");
+        System.out.println("5. Go back");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                addAuction();
+                break;
+            case "2":
+                editAuction();
+                break;
+            case "3":
+                deleteAuction();
+                break;
+            case "4":
+                viewAllAuctions();
+                break;
+            case "5":
+                adminMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                auctionManagement();
+        }
+    }
+
+    private void deleteAuction() {
+        System.out.println("-------------------------");
+        List<Auction> auctions = auctionMapper.findAll();
+        if (auctions.isEmpty()) {
+            System.out.println("No auctions found.");
+            auctionManagement();
+            return;
+        }
+        System.out.println("Select an auction to delete:");
+        for (int i = 0; i < auctions.size(); i++) {
+            Auction auction = auctions.get(i);
+            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+        }
+        System.out.println("Enter the number of the auction to delete, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionManagement();
+            return;
+        }
+        if (index < 0 || index >= auctions.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionManagement();
+            return;
+        }
+        Auction auctionToDelete = auctions.get(index);
+        auctionToDelete.getAuctionHouse().removeAuction(auctionToDelete);
+        auctionMapper.delete(auctionToDelete);
+        System.out.println("Auction deleted successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionManagement();
+    }
+
+    private void editAuction() {
+        System.out.println("-------------------------");
+        List<Auction> auctions = auctionMapper.findAll();
+        if (auctions.isEmpty()) {
+            System.out.println("No auctions found.");
+            auctionManagement();
+            return;
+        }
+        System.out.println("Select an auction to edit:");
+        for(int i = 0; i < auctions.size(); i++) {
+            Auction auction = auctions.get(i);
+            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+        }
+        System.out.println("Enter the number of the auction to edit, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionManagement();
+            return;
+        }
+        if (index < 0 || index >= auctions.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionManagement();
+            return;
+        }
+        Auction auctionToEdit = auctions.get(index);
+        System.out.printf("Editing auction: %s%n", auctionToEdit.getAuctionType());
+        System.out.println("Enter new auction type (or press Enter to keep current):");
+        String newAuctionType = scanner.nextLine().trim();
+        if (!newAuctionType.isEmpty()) {
+            auctionToEdit.setAuctionType(newAuctionType);
+        }
+        System.out.println("Is the auction online? (true/false):");
+        boolean isOnline;
+        while (true) {
+            String onlineInput = scanner.nextLine().trim();
+            if (onlineInput.equalsIgnoreCase("true")) {
+                isOnline = true;
+                break;
+            } else if (onlineInput.equalsIgnoreCase("false")) {
+                isOnline = false;
+                break;
+            } else {
+                System.out.println("Invalid input. Please enter 'true' or 'false':");
+            }
+        }
+        auctionToEdit.setIsOnline(isOnline);
+        auctionMapper.update(auctionToEdit);
+        System.out.println("Auction updated successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionManagement();
+    }
+
+    private void addAuction() {
+        System.out.println("-------------------------");
+        List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
+        if (auctionHouses.isEmpty()) {
+            System.out.println("No auction houses found. Please create an auction house first.");
+            auctionHouseManagement();
+            return;
+        }
+        System.out.println("Select an auction house:");
+        for (int i = 0; i < auctionHouses.size(); i++) {
+            AuctionHouse auctionHouse = auctionHouses.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, auctionHouse.getName(), auctionHouse.getLocation());
+        }
+        System.out.println("Enter the number of the auction house, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionManagement();
+            return;
+        }
+        if (index < 0 || index >= auctionHouses.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionManagement();
+            return;
+        }
+        AuctionHouse selectedAuctionHouse = auctionHouses.get(index);
+        System.out.println("Enter auction type (e.g., Art, Antiques):");
+        String auctionType = scanner.nextLine().trim();
+        System.out.println("Is the auction online? (true/false):");
+        boolean isOnline;
+        while (true) {
+            String onlineInput = scanner.nextLine().trim();
+            if (onlineInput.equalsIgnoreCase("true")) {
+                isOnline = true;
+                break;
+            } else if (onlineInput.equalsIgnoreCase("false")) {
+                isOnline = false;
+                break;
+            } else {
+                System.out.println("Invalid input. Please enter 'true' or 'false':");
+            }
+        }
+        Auction auction = new Auction(auctionType, selectedAuctionHouse, isOnline);
+        auctionMapper.create(auction);
+        selectedAuctionHouse.addAuction(auction);
+        auctionHouseMapper.update(selectedAuctionHouse);
+        System.out.println("Auction created successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionManagement();
+    }
+
+    private void viewAllAuctions() {
+        List<Auction> auctions = auctionMapper.findAll();
+        if (auctions.isEmpty()) {
+            System.out.println("No auctions found.");
+            auctionManagement();
+            return;
+        }
+        System.out.println("\nAuctions:");
+        for (int i = 0; i < auctions.size(); i++) {
+            Auction auction = auctions.get(i);
+            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionManagement();
+    }
+
+    private void auctionHouseManagement() {
+        System.out.println("-------------------------");
+        System.out.println("Auction House Management:");
+        System.out.println("1. Add Auction House");
+        System.out.println("2. Edit Auction House");
+        System.out.println("3. Delete Auction House");
+        System.out.println("4. View all auction houses");
+        System.out.println("5. Go back");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                addAuctionHouse();
+                break;
+            case "2":
+                editAuctionHouse();
+                break;
+            case "3":
+                deleteAuctionHouse();
+                break;
+            case "4":
+                viewAllAuctionHouses();
+                break;
+            case "5":
+                adminMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                auctionHouseManagement();
+        }
+    }
+
+    private void deleteAuctionHouse() {
+        System.out.println("-------------------------");
+        List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
+        if (auctionHouses.isEmpty()) {
+            System.out.println("No auction houses found.");
+            auctionHouseManagement();
+            return;
+        }
+        System.out.println("Select an auction house to delete:");
+        for (int i = 0; i < auctionHouses.size(); i++) {
+            AuctionHouse auctionHouse = auctionHouses.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, auctionHouse.getName(), auctionHouse.getLocation());
+        }
+        System.out.println("Enter the number of the auction house to delete, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionHouseManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionHouseManagement();
+            return;
+        }
+        if (index < 0 || index >= auctionHouses.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionHouseManagement();
+            return;
+        }
+        AuctionHouse auctionHouseToDelete = auctionHouses.get(index);
+        // Remove all auctions associated with this auction house
+        auctionHouseMapper.delete(auctionHouseToDelete);
+        System.out.println("Auction house deleted successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionHouseManagement();
+    }
+
+    private void editAuctionHouse() {
+        System.out.println("-------------------------");
+        List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
+        if (auctionHouses.isEmpty()) {
+            System.out.println("No auction houses found.");
+            auctionHouseManagement();
+            return;
+        }
+        System.out.println("Select an auction house to edit:");
+        for (int i = 0; i < auctionHouses.size(); i++) {
+            AuctionHouse auctionHouse = auctionHouses.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, auctionHouse.getName(), auctionHouse.getLocation());
+        }
+        System.out.println("Enter the number of the auction house to edit, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionHouseManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionHouseManagement();
+            return;
+        }
+        if (index < 0 || index >= auctionHouses.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionHouseManagement();
+            return;
+        }
+        AuctionHouse auctionHouseToEdit = auctionHouses.get(index);
+        System.out.printf("Editing auction house: %s%n", auctionHouseToEdit.getName());
+        System.out.println("Enter new name (or press Enter to keep current):");
+        String newName = scanner.nextLine().trim();
+        if (!newName.isEmpty()) {
+            auctionHouseToEdit.setName(newName);
+        }
+        System.out.println("Enter new location (or press Enter to keep current):");
+        String newLocation = scanner.nextLine().trim();
+        if (!newLocation.isEmpty()) {
+            auctionHouseToEdit.setLocation(newLocation);
+        }
+        auctionHouseMapper.update(auctionHouseToEdit);
+        System.out.println("Auction house updated successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionHouseManagement();
+    }
+
+    private void viewAllAuctionHouses() {
+        List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
+        if (auctionHouses.isEmpty()) {
+            System.out.println("No auction houses found.");
+            auctionHouseManagement();
+            return;
+        }
+        System.out.println("\nAuction Houses:");
+        for (int i = 0; i < auctionHouses.size(); i++) {
+            AuctionHouse auctionHouse = auctionHouses.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, auctionHouse.getName(), auctionHouse.getLocation());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionHouseManagement();
+    }
+
+    private void addAuctionHouse() {
+        System.out.println("-------------------------");
+        System.out.println("Enter auction house name:");
+        String name = scanner.nextLine().trim();
+        System.out.println("Enter auction house location:");
+        String location = scanner.nextLine().trim();
+        AuctionHouse auctionHouse = new AuctionHouse(name, location);
+        auctionHouseMapper.create(auctionHouse);
+        System.out.println("Auction house created successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        auctionHouseManagement();
+    }
+
+    private void objectOfInterestManagement() {
+        System.out.println("-------------------------");
+        System.out.println("Object of Interest Management:");
+        System.out.println("1. Add Object of Interest");
+        System.out.println("2. Edit Object of Interest");
+        System.out.println("3. Delete Object of Interest");
+        System.out.println("4. View all objects of interest");
+        System.out.println("5. Go back");
+        System.out.println("-------------------------");
+        System.out.println("Enter your choice:");
+        String choice = scanner.nextLine().trim();
+        switch(choice){
+            case "1":
+                addObjectOfInterest();
+                break;
+            case "2":
+                editObjectOfInterest();
+                break;
+            case "3":
+                deleteObjectOfInterest();
+                break;
+            case "4":
+                viewAllObjectsOfInterest();
+                break;
+            case "5":
+                adminMenu();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                objectOfInterestManagement();
+        }
+    }
+
+    private void deleteObjectOfInterest() {
+        System.out.println("-------------------------");
+        List<ObjectOfInterest> objects = objectMapper.findAll();
+        if (objects.isEmpty()) {
+            System.out.println("No objects of interest found.");
+            objectOfInterestManagement();
+            return;
+        }
+        System.out.println("Select an object of interest to delete:");
+        for (int i = 0; i < objects.size(); i++) {
+            ObjectOfInterest object = objects.get(i);
+            System.out.printf("%d. %s (%s) (Owned by: %s)%n", i + 1, object.getTitle(), object.getType(), object.getInstitution().getName());
+        }
+        System.out.println("Enter the number of the object to delete, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            objectOfInterestManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            objectOfInterestManagement();
+            return;
+        }
+        if (index < 0 || index >= objects.size()) {
+            System.out.println("Selection out of range. Try again.");
+            objectOfInterestManagement();
+            return;
+        }
+        ObjectOfInterest objectToDelete = objects.get(index);
+        objectToDelete.getInstitution().removeObject(objectToDelete);
+        objectMapper.delete(objectToDelete);
+        System.out.println("Object of interest deleted successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        objectOfInterestManagement();
+    }
+
+    private void editObjectOfInterest() {
+        System.out.println("-------------------------");
+        List<ObjectOfInterest> objects = objectMapper.findAll();
+        if (objects.isEmpty()) {
+            System.out.println("No objects of interest found.");
+            objectOfInterestManagement();
+            return;
+        }
+        System.out.println("Select an object of interest to edit:");
+        for (int i = 0; i < objects.size(); i++) {
+            ObjectOfInterest object = objects.get(i);
+            System.out.printf("%d. %s (%s) (Owned by: %s)%n", i + 1, object.getTitle(), object.getType(), object.getInstitution().getName());
+        }
+        System.out.println("Enter the number of the object to edit, or 'q' to go back:");
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            objectOfInterestManagement();
+            return;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            objectOfInterestManagement();
+            return;
+        }
+        if (index < 0 || index >= objects.size()) {
+            System.out.println("Selection out of range. Try again.");
+            objectOfInterestManagement();
+            return;
+        }
+        ObjectOfInterest objectToEdit = objects.get(index);
+        System.out.printf("Editing object of interest: %s%n", objectToEdit.getTitle());
+        System.out.println("Enter new title (or press Enter to keep current):");
+        String newTitle = scanner.nextLine().trim();
+        if (!newTitle.isEmpty()) {
+            objectToEdit.setTitle(newTitle);
+        }
+        System.out.println("Enter new description (or press Enter to keep current):");
+        String newDescription = scanner.nextLine().trim();
+        if (!newDescription.isEmpty()) {
+            objectToEdit.setDescription(newDescription);
+        }
+        System.out.println("Enter new type (or press Enter to keep current):");
+        String newType = scanner.nextLine().trim();
+        if (!newType.isEmpty()) {
+            objectToEdit.setType(newType);
+        }
+        System.out.println("Enter new institution name (or press Enter to keep current):");
+        String newInstitutionName = scanner.nextLine().trim();
+        if (!newInstitutionName.isEmpty()) {
+            InstitutionMapper institutionMapper = new InstitutionMapper();
+            Institution newInstitution = institutionMapper.findByName(newInstitutionName);
+            if (newInstitution == null) {
+                System.out.println("Institution not found. Please create the institution first.");
+                objectOfInterestManagement();
+                return;
+            }
+            objectToEdit.setInstitution(newInstitution);
+        }
+        objectMapper.update(objectToEdit);
+        System.out.println("Object of interest updated successfully.");
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        objectOfInterestManagement();
+    }
+
+    private void viewAllObjectsOfInterest() {
+        List<ObjectOfInterest> objects = objectMapper.findAll();
+        if (objects.isEmpty()) {
+            System.out.println("No objects of interest found.");
+            objectOfInterestManagement();
+            return;
+        }
+        System.out.println("\nObjects of Interest:");
+        for (int i = 0; i < objects.size(); i++) {
+            ObjectOfInterest object = objects.get(i);
+            System.out.printf("%d. %s (%s) (Owned by: %s)%n", i + 1, object.getTitle(), object.getType(), object.getInstitution().getName());
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        objectOfInterestManagement();
+    }
+
+    private void addObjectOfInterest() {
+        System.out.println("-------------------------");
+        System.out.println("Enter object of interest title:");
+        String title = scanner.nextLine().trim();
+        System.out.println("Enter object of interest description:");
+        String description = scanner.nextLine().trim();
+        System.out.println("Enter object of interest type:");
+        String type = scanner.nextLine().trim();
+        System.out.println("Enter institution name:");
+        String institutionName = scanner.nextLine().trim();
+
+        InstitutionMapper institutionMapper = new InstitutionMapper();
+        Institution institution = institutionMapper.findByName(institutionName);
+        if (institution == null) {
+            System.out.println("Institution not found. Please create the institution first.");
+            adminMenu();
+            return;
+        }
+
+        ObjectOfInterest objectOfInterest = new ObjectOfInterest(title, description, type, institution);
+        objectMapper.create(objectOfInterest);
+        System.out.println("Object of interest created successfully.");
+        adminMenu();
     }
 
     public void expertMenu(){
@@ -219,7 +1362,7 @@ public class Console {
                 viewInstitutionInformation();
                 break;
             case "2":
-                //availabilityManagement();
+                manageExpertAvailability((Expert) this.currentUser);
                 break;
             case "3":
                 this.currentUser = null;
@@ -230,6 +1373,8 @@ public class Console {
                 expertMenu();
         }
     }
+
+
 
     private void viewInstitutionInformation() {
         System.out.println("-------------------------");
@@ -808,7 +1953,11 @@ public class Console {
                 deleteAvailability(expert);
                 break;
             case "5":
-                expertManagement();
+                if (currentUser instanceof Administrator) {
+                    adminMenu();
+                } else {
+                    expertMenu();
+                }
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");

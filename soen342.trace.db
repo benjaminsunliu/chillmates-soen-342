@@ -39,3 +39,6 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: /Users/benjaminl
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:286)
 	... 16 more
+2025-04-09 23:52:22.998261-04:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "[*]INSTITUTION_USER"; expected "INSERT"; SQL statement:
+INSTITUTION_USER [42001-232]

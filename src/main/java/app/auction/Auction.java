@@ -14,7 +14,7 @@ public class Auction {
     @JoinColumn(name = "auction_house_id")
     private AuctionHouse auctionHouse;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "viewing_id", referencedColumnName = "id")
     private Viewing viewing;
 
@@ -68,4 +68,13 @@ public class Auction {
     public void setViewing(Viewing viewing) {
         this.viewing = viewing;
     }
+
+    public void setAuctionType(String auctionType) {
+        this.auctionType = auctionType;
+    }
+    public void setIsOnline(boolean isOnline) {
+        this.isOnline = isOnline;
+    }
+
+
 }
