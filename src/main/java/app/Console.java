@@ -1,8 +1,5 @@
 package app;
-import app.auction.Auction;
-import app.auction.AuctionHouse;
-import app.auction.ObjectOfInterest;
-import app.auction.Viewing;
+import app.auction.*;
 import app.mappers.*;
 import app.services.Availability;
 import app.services.ServiceRequest;

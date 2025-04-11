@@ -1,6 +1,6 @@
 package app.mappers;
 
-import app.Institution;
+import app.auction.Institution;
 import app.auction.ObjectOfInterest;
 import jakarta.persistence.TypedQuery;
 

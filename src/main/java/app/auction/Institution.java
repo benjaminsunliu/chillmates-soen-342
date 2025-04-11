@@ -1,12 +1,8 @@
-package app;
+package app.auction;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import app.users.*;
-import app.catalogs.*;
-import app.auction.*;
-import app.services.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;

@@ -2,7 +2,7 @@ package app.catalogs;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.Institution;
+import app.auction.Institution;
 import app.auction.ObjectOfInterest;
 
 public class ObjectCatalog {
