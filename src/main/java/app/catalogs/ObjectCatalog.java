@@ -7,6 +7,7 @@ import app.auction.ObjectOfInterest;
 
 public class ObjectCatalog {
     private List<ObjectOfInterest> objects;
+    private static ObjectCatalog instance;
 
     public ObjectCatalog() {
         this.objects = new ArrayList<>();
@@ -22,6 +23,13 @@ public class ObjectCatalog {
 
     public Object[] getAvailableObjects(){
         return this.objects.toArray();
+    }
+
+    public static ObjectCatalog getInstance() {
+        if (instance == null) {
+            instance = new ObjectCatalog();
+        }
+        return instance;
     }
 
     public Object addObject(String name, String description, String type, Institution institution) {

@@ -6,6 +6,7 @@ import java.util.List;
 
 public class ViewingCatalog {
     private List<Viewing> viewings;
+    private static ViewingCatalog instance;
 
     public ViewingCatalog() {
         this.viewings = new ArrayList<>();
@@ -17,5 +18,12 @@ public class ViewingCatalog {
 
     public List<Viewing> getViewings() {
         return this.viewings;
+    }
+
+    public static ViewingCatalog getInstance() {
+        if (instance == null) {
+            instance = new ViewingCatalog();
+        }
+        return instance;
     }
 }

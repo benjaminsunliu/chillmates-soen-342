@@ -6,6 +6,7 @@ import app.auction.AuctionHouse;
 
 public class AuctionHouseCatalog {
     private List<AuctionHouse> auctionHouses;
+    private static AuctionHouseCatalog instance;
 
     public AuctionHouseCatalog() {
         this.auctionHouses = new ArrayList<>();
@@ -17,5 +18,12 @@ public class AuctionHouseCatalog {
 
     public List<AuctionHouse> getAuctionHouses() {
         return this.auctionHouses;
+    }
+
+    public static AuctionHouseCatalog getInstance() {
+        if (instance == null) {
+            instance = new AuctionHouseCatalog();
+        }
+        return instance;
     }
 }
