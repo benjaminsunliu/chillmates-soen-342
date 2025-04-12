@@ -1,5 +1,6 @@
 package app.services;
 
+import app.auction.Auction;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,10 @@ public class TimeSlot {
     @OneToOne(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "service_request_id")
     private ServiceRequest serviceRequest;
+
+    @OneToOne(mappedBy = "timeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
 
     public TimeSlot(LocalDateTime startTime, LocalDateTime endTime) {
         this.startTime = startTime;

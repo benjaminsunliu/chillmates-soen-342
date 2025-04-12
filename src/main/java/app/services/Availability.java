@@ -15,7 +15,7 @@ public class Availability {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "availability")
     private List<TimeSlot> timeSlots;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "expert_id")
     private Expert expert;
 

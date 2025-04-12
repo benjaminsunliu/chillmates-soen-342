@@ -708,11 +708,12 @@ public class Console {
             return;
         }
         System.out.println("Select a new expert (or press Enter to keep current):");
+
         for (int i = 0; i < experts.size(); i++) {
             Expert expert = experts.get(i);
             System.out.printf("%d. %s (%s)%n", i + 1, expert.getEmail(), expert.getAreaOfExpertise());
         }
-        System.out.println("Enter the number of the expert, or 'q' to go back:");
+        System.out.println("Enter the number of the expert, or press Enter to keep current, or 'q' to go back:");
         input = scanner.nextLine().trim();
         if (input.equalsIgnoreCase("q")) {
             serviceRequestManagement();
@@ -721,18 +722,18 @@ public class Console {
         if (!input.isEmpty()) {
             try {
                 index = Integer.parseInt(input) - 1;
+                if (index < 0 || index >= experts.size()) {
+                    System.out.println("Selection out of range. Try again.");
+                    serviceRequestManagement();
+                    return;
+                }
+                Expert selectedExpert = experts.get(index);
+                selectedServiceRequest.setAssignedExpert(selectedExpert);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+                System.out.println("Invalid input. Please enter a valid number, press Enter to keep current, or 'q' to go back.");
                 serviceRequestManagement();
                 return;
             }
-            if (index < 0 || index >= experts.size()) {
-                System.out.println("Selection out of range. Try again.");
-                serviceRequestManagement();
-                return;
-            }
-            Expert selectedExpert = experts.get(index);
-            selectedServiceRequest.setAssignedExpert(selectedExpert);
         }
         List<Client> clients = userMapper.findClients();
         if (clients.isEmpty()) {
@@ -804,9 +805,13 @@ public class Console {
                 return;
             }
 
+        } else {
+            selectedServiceRequest.setTimeSlot(selectedServiceRequest.getTimeSlot()); // Keep current
         }
-        TimeSlot selectedTimeSlot = timeSlots.get(index);
-        selectedServiceRequest.setTimeSlot(selectedTimeSlot);
+        if (!input.isEmpty()) {
+            TimeSlot selectedTimeSlot = timeSlots.get(index);
+            selectedServiceRequest.setTimeSlot(selectedTimeSlot);
+        }
         serviceRequestMapper.update(selectedServiceRequest);
         System.out.println("Service request updated successfully.");
         System.out.println("Press Enter to go back.");
@@ -1215,22 +1220,31 @@ public class Console {
     private void deleteAuction() {
         System.out.println("-------------------------");
         List<Auction> auctions = auctionMapper.findAll();
+
         if (auctions.isEmpty()) {
             System.out.println("No auctions found.");
             auctionManagement();
             return;
         }
+
         System.out.println("Select an auction to delete:");
         for (int i = 0; i < auctions.size(); i++) {
             Auction auction = auctions.get(i);
-            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+            System.out.printf("%d. %s (%s) at %s%n",
+                    i + 1,
+                    auction.getAuctionType(),
+                    auction.getIsOnline() ? "Online" : "In-person",
+                    auction.getAuctionHouse().getName());
         }
+
         System.out.println("Enter the number of the auction to delete, or 'q' to go back:");
         String input = scanner.nextLine().trim();
+
         if (input.equalsIgnoreCase("q")) {
             auctionManagement();
             return;
         }
+
         int index;
         try {
             index = Integer.parseInt(input) - 1;
@@ -1239,19 +1253,39 @@ public class Console {
             auctionManagement();
             return;
         }
+
         if (index < 0 || index >= auctions.size()) {
             System.out.println("Selection out of range. Try again.");
             auctionManagement();
             return;
         }
+
         Auction auctionToDelete = auctions.get(index);
-        auctionToDelete.getAuctionHouse().removeAuction(auctionToDelete);
+
+        // Detach the object of interest if present
+        ObjectOfInterest associatedObj = auctionToDelete.getObjectOfInterest();
+        if (associatedObj != null) {
+            associatedObj.setAuction(null);
+            objectMapper.update(associatedObj);
+        }
+        auctionToDelete.setObjectOfInterest(null);
+        auctionMapper.update(auctionToDelete);
+
+        // Store the auction house before removing the auction
+        AuctionHouse auctionHouse = auctionToDelete.getAuctionHouse();
+        if (auctionHouse != null) {
+            auctionHouse.removeAuction(auctionToDelete);
+            auctionHouseMapper.update(auctionHouse);
+        }
+
         auctionMapper.delete(auctionToDelete);
+
         System.out.println("Auction deleted successfully.");
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         auctionManagement();
     }
+
 
     private void editAuction() {
         System.out.println("-------------------------");
@@ -1307,6 +1341,40 @@ public class Console {
             }
         }
         auctionToEdit.setIsOnline(isOnline);
+        System.out.println("Enter new auction start date time (yyyy-MM-dd HH:mm) or press Enter to keep current:");
+        String newStartDateTimeInput = scanner.nextLine().trim();
+        if (!newStartDateTimeInput.isEmpty()) {
+            LocalDateTime newStartDateTime;
+            try {
+                newStartDateTime = LocalDateTime.parse(newStartDateTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+                auctionManagement();
+                return;
+            }
+            auctionToEdit.getTimeSlot().setStartTime(newStartDateTime);
+        }
+        System.out.println("Enter new auction end date time (yyyy-MM-dd HH:mm) or press Enter to keep current:");
+        String newEndDateTimeInput = scanner.nextLine().trim();
+        if (!newEndDateTimeInput.isEmpty()) {
+            LocalDateTime newEndDateTime;
+            try {
+                newEndDateTime = LocalDateTime.parse(newEndDateTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+                auctionManagement();
+                return;
+            }
+            auctionToEdit.getTimeSlot().setEndTime(newEndDateTime);
+        }
+        // Check if the auction house already has an auction scheduled during this time
+        for (Auction auction : auctionToEdit.getAuctionHouse().getAuctions()) {
+            if (auction != auctionToEdit && auction.getTimeSlot().getStartTime().isBefore(auctionToEdit.getTimeSlot().getEndTime()) && auction.getTimeSlot().getEndTime().isAfter(auctionToEdit.getTimeSlot().getStartTime())) {
+                System.out.println("This auction house already has an auction scheduled during this time.");
+                auctionManagement();
+                return;
+            }
+        }
         auctionMapper.update(auctionToEdit);
         System.out.println("Auction updated successfully.");
         System.out.println("Press Enter to go back.");
@@ -1347,6 +1415,42 @@ public class Console {
             return;
         }
         AuctionHouse selectedAuctionHouse = auctionHouses.get(index);
+        System.out.println("Select the object to auction:");
+        List<ObjectOfInterest> auctionObjects = objectMapper.findAll();
+        if (auctionObjects.isEmpty()) {
+            System.out.println("No objects found. Please create an object first.");
+            auctionManagement();
+            return;
+        }
+        for (int i = 0; i < auctionObjects.size(); i++) {
+            ObjectOfInterest object = auctionObjects.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, object.getTitle(), object.getDescription());
+        }
+        System.out.println("Enter the number of the object, or 'q' to go back:");
+        input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("q")) {
+            auctionManagement();
+            return;
+        }
+        try {
+            index = Integer.parseInt(input) - 1;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'q' to go back.");
+            auctionManagement();
+            return;
+        }
+        if (index < 0 || index >= auctionObjects.size()) {
+            System.out.println("Selection out of range. Try again.");
+            auctionManagement();
+            return;
+        }
+        ObjectOfInterest selectedObject = auctionObjects.get(index);
+        if (selectedObject.getAuction() != null) {
+            System.out.println("This object is already associated with an auction.");
+            auctionManagement();
+            return;
+        }
+
         System.out.println("Enter auction type (e.g., Art, Antiques):");
         String auctionType = scanner.nextLine().trim();
         System.out.println("Is the auction online? (true/false):");
@@ -1363,7 +1467,44 @@ public class Console {
                 System.out.println("Invalid input. Please enter 'true' or 'false':");
             }
         }
-        Auction auction = new Auction(auctionType, selectedAuctionHouse, isOnline);
+        System.out.println("Enter auction start date time (yyyy-MM-dd HH:mm):");
+        String startDateTimeInput = scanner.nextLine().trim();
+        LocalDateTime startDateTime;
+        try {
+            startDateTime = LocalDateTime.parse(startDateTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+            auctionManagement();
+            return;
+        }
+        System.out.println("Enter auction end date time (yyyy-MM-dd HH:mm):");
+        String endDateTimeInput = scanner.nextLine().trim();
+        LocalDateTime endDateTime;
+        try {
+            endDateTime = LocalDateTime.parse(endDateTimeInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+            auctionManagement();
+            return;
+        }
+        if (endDateTime.isBefore(startDateTime)) {
+            System.out.println("End date time cannot be before start date time.");
+            auctionManagement();
+            return;
+        }
+
+        // Check if the auction house already has an auction scheduled during this time
+        for (Auction auction : selectedAuctionHouse.getAuctions()) {
+            if (auction.getTimeSlot().getStartTime().isBefore(endDateTime) && auction.getTimeSlot().getEndTime().isAfter(startDateTime)) {
+                System.out.println("This auction house already has an auction scheduled during this time.");
+                auctionManagement();
+                return;
+            }
+        }
+        TimeSlot timeSlot = new TimeSlot(startDateTime, endDateTime);
+
+        Auction auction = new Auction(auctionType, selectedAuctionHouse, isOnline, timeSlot, selectedObject);
+        selectedObject.setAuction(auction);
         auctionMapper.create(auction);
         selectedAuctionHouse.addAuction(auction);
         auctionHouseMapper.update(selectedAuctionHouse);
@@ -1383,7 +1524,7 @@ public class Console {
         System.out.println("\nAuctions:");
         for (int i = 0; i < auctions.size(); i++) {
             Auction auction = auctions.get(i);
-            System.out.printf("%d. %s (%s) at %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName());
+            System.out.printf("%d. %s (%s) at %s from %s - %s %n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person", auction.getAuctionHouse().getName(), auction.getTimeSlot().getStartTime(), auction.getTimeSlot().getEndTime());
         }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -1751,7 +1892,13 @@ public class Console {
                 viewViewings();
                 break;
             case "4":
-                expertMenu();
+                if (currentUser.getRole() == "Admin") {
+                    adminMenu();
+                } else if (currentUser.getRole() == "Client") {
+                    clientMenu();
+                } else if (currentUser.getRole() == "Expert") {
+                    expertMenu();
+                }
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -2254,7 +2401,7 @@ public class Console {
                 viewAllExperts();
                 break;
             case "6":
-                viewServiceRequests();
+                viewAllServiceRequests();
                 break;
             case "7":
                 userManagement();
@@ -2263,24 +2410,6 @@ public class Console {
                 System.out.println("Invalid choice. Please try again.");
                 expertManagement();
         }
-    }
-
-    private void viewServiceRequests() {
-        System.out.println("-------------------------");
-        System.out.println("Service Requests:");
-        List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
-        if (serviceRequests.isEmpty()) {
-            System.out.println("No service requests found.");
-            expertManagement();
-            return;
-        }
-        for (int i = 0; i < serviceRequests.size(); i++) {
-            ServiceRequest sr = serviceRequests.get(i);
-            System.out.printf(sr.toString() + "\n");
-        }
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        expertManagement();
     }
 
     private void manageExpertAvailability(Expert expert) {

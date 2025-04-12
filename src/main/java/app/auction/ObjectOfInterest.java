@@ -1,10 +1,6 @@
 package app.auction;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class ObjectOfInterest {
@@ -18,12 +14,35 @@ public class ObjectOfInterest {
     @GeneratedValue
     private Long id;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
+
     public ObjectOfInterest(String title, String description, String type, Institution institution) {
         this.title = title;
         this.description = description;
         this.type = type;
         this.institution = institution;
     }
+    public ObjectOfInterest(String title, String description, String type) {
+        this.title = title;
+        this.description = description;
+        this.type = type;
+    }
+    public ObjectOfInterest(String title, String type, String description, Institution institution, Auction auction) {
+        this.title = title;
+        this.description = description;
+        this.institution = institution;
+        this.type = type;
+        this.auction = auction;
+    }
+    public ObjectOfInterest(String title, String type, String description, Auction auction) {
+        this.title = title;
+        this.description = description;
+        this.type = type;
+        this.auction = auction;
+    }
+
 
     public ObjectOfInterest() {
 
@@ -65,6 +84,13 @@ public class ObjectOfInterest {
     }
     public Institution getInstitution() {
         return institution;
+    }
+
+    public Auction getAuction() {
+        return auction;
+    }
+    public void setAuction(Auction auction) {
+        this.auction = auction;
     }
 
 }

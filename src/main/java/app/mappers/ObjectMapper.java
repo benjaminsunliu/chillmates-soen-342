@@ -11,4 +11,9 @@ public class ObjectMapper extends DataMapper{
                 "SELECT o FROM ObjectOfInterest o", ObjectOfInterest.class);
         return query.getResultList();
     }
+    public List<ObjectOfInterest> findWithoutAuction() {
+        TypedQuery<ObjectOfInterest> query = entityManager.createQuery(
+                "SELECT o FROM ObjectOfInterest o WHERE o.auction IS NULL", ObjectOfInterest.class);
+        return query.getResultList();
+    }
 }

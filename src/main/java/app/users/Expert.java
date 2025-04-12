@@ -22,12 +22,14 @@ public class Expert extends User {
         super(email, password);
         this.licenseNumber = licenseNumber;
         this.areaOfExpertise = areaOfExpertise;
-        this.availability = new Availability();
+        this.availability = new Availability(this);
+        this.serviceRequests = new ArrayList<>();
     }
 
     public Expert() {
         super();
-        this.availability = new Availability();
+        this.availability = new Availability(this);
+        this.serviceRequests = new ArrayList<>();
     }
 
     public String getLicenseNumber() {

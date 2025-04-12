@@ -16,7 +16,7 @@ public class ServiceRequest {
     @JoinColumn(name = "client_id")
     private Client requestingClient;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "time_slot_id")
     private TimeSlot timeSlot;
 
@@ -66,8 +66,17 @@ public class ServiceRequest {
         this.timeSlot = timeSlot;
     }
 
+    @Override
     public String toString() {
-        return "Service Request ID: " + this.id + "\n\t- Request Type: " + this.requestType + "\n\t- Assigned Expert: "  + this.assignedExpert.getEmail() + "\n\t- Requesting Client: " + this.requestingClient.getEmail() + "\n\t- Time Slot: " + this.timeSlot.toString() + "\n";
+        String expertEmail = (assignedExpert != null) ? assignedExpert.getEmail() : "Not assigned";
+        String clientEmail = (requestingClient != null) ? requestingClient.getEmail() : "Unknown";
+        String timeSlotStr = (timeSlot != null) ? timeSlot.toString() : "No time slot";
+
+        return "Service Request ID: " + this.id +
+                "\n\t- Request Type: " + this.requestType +
+                "\n\t- Assigned Expert: " + expertEmail +
+                "\n\t- Requesting Client: " + clientEmail +
+                "\n\t- Time Slot: " + timeSlotStr + "\n";
     }
 
     public void setId(Long id) {

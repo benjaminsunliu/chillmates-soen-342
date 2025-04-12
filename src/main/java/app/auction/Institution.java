@@ -3,10 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.users.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 @Entity
 public class Institution {
@@ -16,6 +13,7 @@ public class Institution {
     private List<User> users;
 
     @OneToMany
+    @JoinColumn(name = "institution_id")
     private List<ObjectOfInterest> ownedObjects;
 
     @Id

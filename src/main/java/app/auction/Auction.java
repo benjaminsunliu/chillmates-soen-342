@@ -1,5 +1,6 @@
 package app.auction;
 import app.mappers.AuctionMapper;
+import app.services.TimeSlot;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,22 +19,35 @@ public class Auction {
     @JoinColumn(name = "viewing_id", referencedColumnName = "id")
     private Viewing viewing;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "time_slot_id", referencedColumnName = "id")
+    private TimeSlot timeSlot;
 
-    public Auction(String auctionType, AuctionHouse auctionHouse, boolean isOnline, Viewing viewing) {
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
+    @JoinColumn(name = "object_of_interest_id")
+    private ObjectOfInterest objectOfInterest;
+
+
+    public Auction(String auctionType, AuctionHouse auctionHouse, boolean isOnline, Viewing viewing, TimeSlot timeSlot, ObjectOfInterest objectOfInterest) {
         this.auctionHouse = auctionHouse;
         this.auctionType = auctionType;
         this.isOnline = isOnline;
         this.viewing = viewing;
+        this.timeSlot = timeSlot;
+        this.objectOfInterest = objectOfInterest;
     }
-    public Auction(String auctionType, AuctionHouse auctionHouse, boolean isOnline) {
+    public Auction(String auctionType, AuctionHouse auctionHouse, boolean isOnline, TimeSlot timeSlot, ObjectOfInterest objectOfInterest) {
         this.auctionHouse = auctionHouse;
         this.auctionType = auctionType;
         this.isOnline = isOnline;
+        this.timeSlot = timeSlot;
+        this.objectOfInterest = objectOfInterest;
     }
 
     public Auction() {
 
     }
+
 
     public String getAuctionType() {
         return this.auctionType;
@@ -74,6 +88,19 @@ public class Auction {
     }
     public void setIsOnline(boolean isOnline) {
         this.isOnline = isOnline;
+    }
+
+    public TimeSlot getTimeSlot() {
+        return timeSlot;
+    }
+    public void setTimeSlot(TimeSlot timeSlot) {
+        this.timeSlot = timeSlot;
+    }
+    public ObjectOfInterest getObjectOfInterest() {
+        return objectOfInterest;
+    }
+    public void setObjectOfInterest(ObjectOfInterest objectOfInterest) {
+        this.objectOfInterest = objectOfInterest;
     }
 
 

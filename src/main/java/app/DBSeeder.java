@@ -5,6 +5,7 @@ import app.mappers.*;
 import app.services.*;
 import app.users.*;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 
 
@@ -49,10 +50,10 @@ public class DBSeeder {
         userMapper.create(expert2);
         userMapper.create(client2);
 
-        Availability availability = new Availability(expert);
-        availabilityMapper.create(availability);
-        Availability availability2 = new Availability(expert2);
-        availabilityMapper.create(availability2);
+        availabilityMapper.create(expert.getAvailability());
+        availabilityMapper.create(expert2.getAvailability());
+        Availability availability = expert.getAvailability();
+        Availability availability2 = expert2.getAvailability();
 
         TimeSlot ts1 = new TimeSlot(LocalDateTime.of(2025, 4, 1, 14, 0),
                 LocalDateTime.of(2025, 4, 1, 16, 0));
@@ -104,8 +105,17 @@ public class DBSeeder {
         institutionMapper.create(institution2);
         ObjectOfInterest obj2 = new ObjectOfInterest("Historic Coin", "A coin from the 1700s", "category", institution2);
         ObjectOfInterest obj3 = new ObjectOfInterest("Ancient Manuscript", "Old text", "category", institution2);
+        ObjectOfInterest obj4 = new ObjectOfInterest("Rare Painting", "Famous artist", "category", institution2);
+        ObjectOfInterest obj5 = new ObjectOfInterest("Sculpture", "Famous artist", "category", institution2);
+        ObjectOfInterest obj6 = new ObjectOfInterest("Antique Vase", "Old vase", "category", institution2);
         objectMapper.create(obj2);
         objectMapper.create(obj3);
+        objectMapper.create(obj4);
+        objectMapper.create(obj5);
+        objectMapper.create(obj6);
+        institution2.addObject(obj4);
+        institution2.addObject(obj5);
+        institution2.addObject(obj6);
         institution2.addObject(obj2);
         institution2.addObject(obj3);
         institutionMapper.update(institution2);
@@ -115,12 +125,30 @@ public class DBSeeder {
         auctionHouseMapper.create(house1);
         auctionHouseMapper.create(house2);
 
-        Auction auction1 = new Auction("Vintage Clock", house1,false);
-        Auction auction2 = new Auction("Rare Painting", house1, true);
-        Auction auction3 = new Auction("Antique Vase", house2,true);
-        Auction auction4 = new Auction("Classic Sculpture", house2, false);
-        Auction auction5 = new Auction("Retro Camera", house1, true);
-        Auction auction6 = new Auction("Medieval Sword", house2, false);
+        TimeSlot auctionTimeSlot1 = new TimeSlot(LocalDateTime.of(2025, 4, 1, 14, 0),
+                LocalDateTime.of(2025, 4, 1, 16, 0));
+        TimeSlot auctionTimeSlot2 = new TimeSlot(LocalDateTime.of(2025, 4, 2, 10, 0),
+                LocalDateTime.of(2025, 4, 2, 12, 0));
+        TimeSlot auctionTimeSlot3 = new TimeSlot(LocalDateTime.of(2025, 4, 6, 11, 0),
+                LocalDateTime.of(2025, 4, 6, 13, 0));
+        TimeSlot auctionTimeSlot4 = new TimeSlot(LocalDateTime.of(2025, 4, 7, 15, 0),
+                LocalDateTime.of(2025, 4, 7, 17, 0));
+        TimeSlot auctionTimeSlot5 = new TimeSlot(LocalDateTime.of(2025, 4, 8, 9, 0),
+                LocalDateTime.of(2025, 4, 8, 11, 0));
+        TimeSlot auctionTimeSlot6 = new TimeSlot(LocalDateTime.of(2025, 4, 9, 13, 0),
+                LocalDateTime.of(2025, 4, 9, 15, 0));
+        timeSlotMapper.create(auctionTimeSlot1);
+        timeSlotMapper.create(auctionTimeSlot2);
+        timeSlotMapper.create(auctionTimeSlot3);
+        timeSlotMapper.create(auctionTimeSlot4);
+        timeSlotMapper.create(auctionTimeSlot5);
+        timeSlotMapper.create(auctionTimeSlot6);
+        Auction auction1 = new Auction("Oriental", house1,false, auctionTimeSlot1, objectOfInterest);
+        Auction auction2 = new Auction("Oriental", house1, true, auctionTimeSlot2, obj2);
+        Auction auction3 = new Auction("Modern Art", house2,true, auctionTimeSlot3, obj3);
+        Auction auction4 = new Auction("Modern Art", house2, false, auctionTimeSlot4, obj4);
+        Auction auction5 = new Auction("Sculpture", house1, true, auctionTimeSlot5, obj5);
+        Auction auction6 = new Auction("Sculpture", house2, false, auctionTimeSlot6, obj6);
         auctionMapper.create(auction1);
         auctionMapper.create(auction2);
         auctionMapper.create(auction3);
@@ -133,6 +161,12 @@ public class DBSeeder {
         house2.addAuction(auction4);
         house1.addAuction(auction5);
         house2.addAuction(auction6);
+        objectOfInterest.setAuction(auction1);
+        obj2.setAuction(auction2);
+        obj3.setAuction(auction3);
+        obj4.setAuction(auction4);
+        obj5.setAuction(auction5);
+        obj6.setAuction(auction6);
 
         Viewing viewing1 = new Viewing(LocalDateTime.of(2025, 4, 1, 14, 0),
                 LocalDateTime.of(2025, 4, 1, 16, 0), auction1);

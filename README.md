@@ -1,4 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/-9QgYBSe)
 # SOEN 342 
 
 ### Contributors:
@@ -7,3 +6,12 @@
 
 - **Jordan YEH**  
   Student ID: 40283075
+
+### Design Patterns Used:
+- **Singleton**: Used for Catalogs to ensure only one instance of each catalog exists.
+- **Data Mapper**: Used to map data between the database and the application.
+
+### Architecture:
+- **Console Application**: The application is a console-based application that interacts with the user through the command line.
+- **Domain Layer**: Contains the core business logic and classes from the domain model.
+- **Persistence Layer**: Contains the classes responsible for data access and storage, using the Data Mapper pattern.
