@@ -1,0 +1,2 @@
+The serviceRequestSSD.png in the same folder depicts only top level messages with the business object.
+Please view the detailed success scenario in the "InteractionDiagram" folder
