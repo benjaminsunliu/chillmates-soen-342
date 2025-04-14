@@ -518,6 +518,7 @@ public class Console {
         String requestType = scanner.nextLine().trim();
         System.out.println("Select a time slot:");
         List<TimeSlot> timeSlots = selectedAvailability.getTimeSlots();
+        Expert chosenExpert = selectedAvailability.getExpert();
         if (timeSlots.isEmpty()) {
             System.out.println("No time slots available for this availability.");
             clientMenu();
@@ -546,10 +547,12 @@ public class Console {
             return;
         }
         TimeSlot selectedTimeSlot = timeSlots.get(index);
-        ServiceRequest serviceRequest = new ServiceRequest(requestType, (Client) this.currentUser, selectedTimeSlot);
-        serviceRequestMapper.create(serviceRequest);
-        selectedTimeSlot.setServiceRequests(serviceRequest);
-        timeSlotMapper.update(selectedTimeSlot);
+        if(selectedTimeSlot.getServiceRequest() != null){
+            System.out.println("This time slot is already booked. Please select another one.");
+            clientMenu();
+            return;
+        }
+        makeServiceRequest(requestType, chosenExpert, (Client) this.currentUser, selectedTimeSlot);
         System.out.println("Service request created successfully.");
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -2755,6 +2758,10 @@ public class Console {
             userMapper.update(expert);
             System.out.println("Expert information updated successfully.");
         }
+    }
+    public void makeServiceRequest(String requestType, Expert expert, Client client, TimeSlot timeslot){
+        ServiceRequest serviceRequest = new ServiceRequest(requestType,expert, (Client) this.currentUser, timeslot);
+        serviceRequestMapper.create(serviceRequest);
     }
 
 
