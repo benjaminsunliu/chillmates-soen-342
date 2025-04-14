@@ -27,6 +27,7 @@ public class Console {
     private ObjectMapper objectMapper;
     private AuctionHouseMapper auctionHouseMapper;
     private AuctionMapper auctionMapper;
+    private ViewingMapper viewingMapper;
 
     public Console(){
         this.scanner = new Scanner(System.in);
@@ -37,6 +38,7 @@ public class Console {
         this.objectMapper = new ObjectMapper();
         this.auctionHouseMapper = new AuctionHouseMapper();
         this.auctionMapper = new AuctionMapper();
+        this.viewingMapper = new ViewingMapper();
     }
 
     public void run(){
@@ -985,7 +987,7 @@ public class Console {
 
     private void deleteViewing() {
         System.out.println("-------------------------");
-        List<Viewing> viewings = auctionMapper.findAllViewings();
+        List<Viewing> viewings = viewingMapper.findAll();
         if (viewings.isEmpty()) {
             System.out.println("No viewings found.");
             viewingManagement();
@@ -1023,7 +1025,7 @@ public class Console {
             auctionMapper.update(auction); // Persist the change
         }
 
-        auctionMapper.deleteViewing(selectedViewing); // Now safe to delete
+        viewingMapper.deleteViewing(selectedViewing); // Now safe to delete
         System.out.println("Viewing deleted successfully.");
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -1032,7 +1034,7 @@ public class Console {
 
     private void editViewing() {
         System.out.println("-------------------------");
-        List<Viewing> viewings = auctionMapper.findAllViewings();
+        List<Viewing> viewings = viewingMapper.findAll();
         if (viewings.isEmpty()) {
             System.out.println("No viewings found.");
             viewingManagement();
@@ -1090,7 +1092,7 @@ public class Console {
             }
             selectedViewing.setEndTime(newEndTime);
         }
-        auctionMapper.updateViewing(selectedViewing);
+        viewingMapper.updateViewing(selectedViewing);
         System.out.println("Viewing updated successfully.");
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -1159,8 +1161,8 @@ public class Console {
 
         Viewing viewing = new Viewing(startTime, endTime, selectedAuction);
         selectedAuction.setViewing(viewing);
-        auctionMapper.createViewing(viewing);
-        auctionMapper.update(selectedAuction);
+        viewingMapper.createViewing(viewing);
+        viewingMapper.update(selectedAuction);
         System.out.println("Viewing created successfully.");
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -1168,7 +1170,7 @@ public class Console {
     }
 
     private void viewAllViewings() {
-        List<Viewing> viewings = auctionMapper.findAllViewings();
+        List<Viewing> viewings = viewingMapper.findAll();
         if (viewings.isEmpty()) {
             System.out.println("No viewings found.");
             viewingManagement();

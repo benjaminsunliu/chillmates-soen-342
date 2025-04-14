@@ -19,7 +19,10 @@ public class AuctionCatalog {
     public List<Auction> getAuctions() {
         return this.auctions;
     }
-    
+
+    public void setAuctions(List<Auction> auctions){
+        this.auctions = auctions;
+    }
     public static AuctionCatalog getInstance() {
         if (instance == null) {
             instance = new AuctionCatalog();

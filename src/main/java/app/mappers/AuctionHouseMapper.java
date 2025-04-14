@@ -2,12 +2,15 @@ package app.mappers;
 
 import app.auction.Auction;
 import app.auction.AuctionHouse;
+import app.catalogs.AuctionHouseCatalog;
 import jakarta.persistence.TypedQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AuctionHouseMapper extends DataMapper{
+
+    private static AuctionHouseCatalog auctionhousecatalog;
     public List<List<Auction>> findAllAuctionsByAuctionHouse() {
         TypedQuery<AuctionHouse> query = entityManager.createQuery(
                 "SELECT ah FROM AuctionHouse ah", AuctionHouse.class);
@@ -24,6 +27,7 @@ public class AuctionHouseMapper extends DataMapper{
     public List<AuctionHouse> findAll() {
         TypedQuery<AuctionHouse> query = entityManager.createQuery(
                 "SELECT ah FROM AuctionHouse ah", AuctionHouse.class);
-        return query.getResultList();
+        auctionhousecatalog.setAuctionHouses(query.getResultList());
+        return auctionhousecatalog.getAuctionHouses();
     }
 }

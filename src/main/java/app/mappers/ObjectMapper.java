@@ -2,14 +2,23 @@ package app.mappers;
 
 import app.auction.ObjectOfInterest;
 import jakarta.persistence.TypedQuery;
+import app.catalogs.ObjectCatalog;
 
 import java.util.List;
 
 public class ObjectMapper extends DataMapper{
+
+    private ObjectCatalog objectcatalog;
+    public ObjectMapper(){
+        super();
+        objectcatalog = ObjectCatalog.getInstance();
+    }
+
     public List<ObjectOfInterest> findAll() {
         TypedQuery<ObjectOfInterest> query = entityManager.createQuery(
                 "SELECT o FROM ObjectOfInterest o", ObjectOfInterest.class);
-        return query.getResultList();
+        objectcatalog.setObjects(query.getResultList());
+        return objectcatalog.getObjects();
     }
     public List<ObjectOfInterest> findWithoutAuction() {
         TypedQuery<ObjectOfInterest> query = entityManager.createQuery(

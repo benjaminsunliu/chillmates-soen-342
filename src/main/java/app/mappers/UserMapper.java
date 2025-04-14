@@ -13,7 +13,6 @@ import app.users.User;
 
 public class UserMapper extends DataMapper<User>{
     private UserCatalog userCatalog;
-
     public UserMapper() {
         super();
         userCatalog = UserCatalog.getInstance();
@@ -32,11 +31,9 @@ public class UserMapper extends DataMapper<User>{
 
     public User findByCredentials(String email, String password) {
         try{
-            TypedQuery<User> query = entityManager.createQuery(
-                    "SELECT u FROM User u WHERE u.email = :email AND u.password = :password", User.class);
-            query.setParameter("email", email);
-            query.setParameter("password", password);
-            return query.getSingleResult();
+            List<User> users = findAll();
+            userCatalog.setUsers(users);
+            return userCatalog.findByEmailAndPassword(email, password);
         }catch (NoResultException e){
             return null;
         }

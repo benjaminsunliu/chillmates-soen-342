@@ -20,6 +20,10 @@ public class ViewingCatalog {
         return this.viewings;
     }
 
+    public void setViewings(List<Viewing> viewings){
+        this.viewings = viewings;
+    }
+
     public static ViewingCatalog getInstance() {
         if (instance == null) {
             instance = new ViewingCatalog();

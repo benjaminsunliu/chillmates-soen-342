@@ -20,6 +20,9 @@ public class AuctionHouseCatalog {
         return this.auctionHouses;
     }
 
+    public void setAuctionHouses(List<AuctionHouse> auctionHouses){
+        this.auctionHouses = auctionHouses;
+    }
     public static AuctionHouseCatalog getInstance() {
         if (instance == null) {
             instance = new AuctionHouseCatalog();

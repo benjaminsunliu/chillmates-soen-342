@@ -32,6 +32,10 @@ public class ObjectCatalog {
         return instance;
     }
 
+    public void setObjects(List<ObjectOfInterest> objects){
+        this.objects = objects;
+    }
+
     public Object addObject(String name, String description, String type, Institution institution) {
         ObjectOfInterest object = new ObjectOfInterest(name, description, type, institution);
         this.addObject(object);
