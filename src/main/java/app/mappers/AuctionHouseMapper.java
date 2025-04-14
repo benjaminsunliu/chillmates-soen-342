@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuctionHouseMapper extends DataMapper{
-
     private static AuctionHouseCatalog auctionhousecatalog;
+    public AuctionHouseMapper() {
+        super();
+        auctionhousecatalog = AuctionHouseCatalog.getInstance();
+    }
+
     public List<List<Auction>> findAllAuctionsByAuctionHouse() {
         TypedQuery<AuctionHouse> query = entityManager.createQuery(
                 "SELECT ah FROM AuctionHouse ah", AuctionHouse.class);

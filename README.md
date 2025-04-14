@@ -31,7 +31,7 @@ It supports three roles:
 - **Expert**: Can manage availability and accept/cancel service requests
 - **Client**: Can view and create service requests based on availability
 
-#  Features
+##  Features
 
 - **Role-based login & registration**
 - **Expert availability & time slot management**

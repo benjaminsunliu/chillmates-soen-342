@@ -10,6 +10,7 @@ import app.users.Expert;
 import app.users.User;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.List;
 import java.time.format.DateTimeParseException;
@@ -40,7 +41,6 @@ public class Console {
         this.auctionMapper = new AuctionMapper();
         this.viewingMapper = new ViewingMapper();
     }
-
     public void run(){
         if(this.currentUser == null){
             mainMenu();
@@ -62,7 +62,6 @@ public class Console {
         }
 
     }
-
     public void mainMenu(){
         System.out.println("-------------------------");
         System.out.println("Main Menu:");
@@ -168,6 +167,7 @@ public class Console {
         mainMenu();
     }
 
+    // Menu Methods
     public void adminMenu(){
         System.out.println("-------------------------");
         System.out.println("Admin Menu:");
@@ -281,6 +281,7 @@ public class Console {
         }
     }
 
+    // Service Request Management Methods
     private void cancelServiceRequest(Expert currentUser) {
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
         List<ServiceRequest> expertRequests = new ArrayList<>();
@@ -335,7 +336,6 @@ public class Console {
         scanner.nextLine();
         expertMenu();
     }
-
     private void viewExpertRequests(Expert currentUser) {
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
         List<ServiceRequest> expertRequests = new ArrayList<>();
@@ -368,7 +368,6 @@ public class Console {
         scanner.nextLine();
         expertMenu();
     }
-
     private void viewRequestsWithoutExpert() {
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
         List<ServiceRequest> unassignedRequests = new ArrayList<>();
@@ -424,9 +423,6 @@ public class Console {
         scanner.nextLine();
         expertMenu();
     }
-
-
-
     private void cancelClientServiceRequest(Client currentUser) {
         System.out.println("-------------------------");
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
@@ -481,7 +477,6 @@ public class Console {
         scanner.nextLine();
         clientMenu();
     }
-
     private void createServiceRequest() {
         List<Availability> availabilities = availabilitymapper.findAll();
         if (availabilities.isEmpty()) {
@@ -546,6 +541,12 @@ public class Console {
             return;
         }
         TimeSlot selectedTimeSlot = timeSlots.get(index);
+        // Check if the time slot is already booked
+        if (selectedTimeSlot.getServiceRequest() != null) {
+            System.out.println("This time slot is already booked. Please select another one.");
+            clientMenu();
+            return;
+        }
         ServiceRequest serviceRequest = new ServiceRequest(requestType, (Client) this.currentUser, selectedTimeSlot);
         serviceRequestMapper.create(serviceRequest);
         selectedTimeSlot.setServiceRequests(serviceRequest);
@@ -555,7 +556,6 @@ public class Console {
         scanner.nextLine();
         clientMenu();
     }
-
     private void viewClientServiceRequests(Client currentUser) {
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
         List<ServiceRequest> clientRequests = new ArrayList<>();
@@ -588,7 +588,6 @@ public class Console {
         scanner.nextLine();
         clientMenu();
     }
-
     private void serviceRequestManagement() {
         System.out.println("-------------------------");
         System.out.println("Service Request Management:");
@@ -621,7 +620,6 @@ public class Console {
                 serviceRequestManagement();
         }
     }
-
     private void deleteServiceRequest() {
         System.out.println("-------------------------");
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
@@ -655,7 +653,9 @@ public class Console {
             return;
         }
         ServiceRequest selectedServiceRequest = serviceRequests.get(index);
-        selectedServiceRequest.getAssignedExpert().getServiceRequests().remove(selectedServiceRequest);
+        if (selectedServiceRequest.getAssignedExpert() != null) {
+            selectedServiceRequest.getAssignedExpert().getServiceRequests().remove(selectedServiceRequest);
+        }
         selectedServiceRequest.getRequestingClient().getServiceRequests().remove(selectedServiceRequest);
         serviceRequestMapper.delete(selectedServiceRequest);
         System.out.println("Service request deleted successfully.");
@@ -663,7 +663,6 @@ public class Console {
         scanner.nextLine();
         serviceRequestManagement();
     }
-
     private void editServiceRequest() {
         System.out.println("-------------------------");
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
@@ -820,7 +819,6 @@ public class Console {
         scanner.nextLine();
         serviceRequestManagement();
     }
-
     private void addServiceRequest() {
         System.out.println("-------------------------");
         System.out.println("Enter the request type:");
@@ -929,7 +927,6 @@ public class Console {
         scanner.nextLine();
         serviceRequestManagement();
     }
-
     private void viewAllServiceRequests() {
         List<ServiceRequest> serviceRequests = serviceRequestMapper.findAll();
         if (serviceRequests.isEmpty()) {
@@ -952,6 +949,7 @@ public class Console {
         serviceRequestManagement();
     }
 
+    // Viewing Management Methods
     private void viewingManagement() {
         System.out.println("-------------------------");
         System.out.println("Viewing Management:");
@@ -974,7 +972,7 @@ public class Console {
                 deleteViewing();
                 break;
             case "4":
-                viewAllViewings();
+                viewViewings();
                 break;
             case "5":
                 adminMenu();
@@ -984,7 +982,6 @@ public class Console {
                 viewingManagement();
         }
     }
-
     private void deleteViewing() {
         System.out.println("-------------------------");
         List<Viewing> viewings = viewingMapper.findAll();
@@ -1031,7 +1028,6 @@ public class Console {
         scanner.nextLine();
         viewingManagement();
     }
-
     private void editViewing() {
         System.out.println("-------------------------");
         List<Viewing> viewings = viewingMapper.findAll();
@@ -1098,7 +1094,6 @@ public class Console {
         scanner.nextLine();
         viewingManagement();
     }
-
     private void addViewing() {
         System.out.println("-------------------------");
         List<Auction> auctions = auctionMapper.findAll();
@@ -1169,23 +1164,7 @@ public class Console {
         viewingManagement();
     }
 
-    private void viewAllViewings() {
-        List<Viewing> viewings = viewingMapper.findAll();
-        if (viewings.isEmpty()) {
-            System.out.println("No viewings found.");
-            viewingManagement();
-            return;
-        }
-        System.out.println("\nViewings:");
-        for (int i = 0; i < viewings.size(); i++) {
-            Viewing viewing = viewings.get(i);
-            System.out.printf("%d. %s Viewing (%s-%s) at %s %n", i + 1, viewing.getAuction().getAuctionType(), viewing.getStartTime(), viewing.getEndTime(),viewing.getAuction().getAuctionHouse().getName());
-        }
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        viewingManagement();
-    }
-
+    // Auction Management Methods
     private void auctionManagement() {
         System.out.println("-------------------------");
         System.out.println("Auction Management:");
@@ -1208,7 +1187,7 @@ public class Console {
                 deleteAuction();
                 break;
             case "4":
-                viewAllAuctions();
+                viewAuctions();
                 break;
             case "5":
                 adminMenu();
@@ -1218,7 +1197,6 @@ public class Console {
                 auctionManagement();
         }
     }
-
     private void deleteAuction() {
         System.out.println("-------------------------");
         List<Auction> auctions = auctionMapper.findAll();
@@ -1287,8 +1265,6 @@ public class Console {
         scanner.nextLine();
         auctionManagement();
     }
-
-
     private void editAuction() {
         System.out.println("-------------------------");
         List<Auction> auctions = auctionMapper.findAll();
@@ -1383,7 +1359,6 @@ public class Console {
         scanner.nextLine();
         auctionManagement();
     }
-
     private void addAuction() {
         System.out.println("-------------------------");
         List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
@@ -1515,12 +1490,17 @@ public class Console {
         scanner.nextLine();
         auctionManagement();
     }
-
-    private void viewAllAuctions() {
+    private void viewAuctions() {
         List<Auction> auctions = auctionMapper.findAll();
         if (auctions.isEmpty()) {
             System.out.println("No auctions found.");
-            auctionManagement();
+            if (currentUser.getRole() == "Admin"){
+                auctionManagement();
+            }
+            else{
+                viewInstitutionInformation();
+            }
+
             return;
         }
         System.out.println("\nAuctions:");
@@ -1530,9 +1510,15 @@ public class Console {
         }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
-        auctionManagement();
+        if (currentUser.getRole() == "Admin"){
+            auctionManagement();
+        }
+        else{
+            viewInstitutionInformation();
+        }
     }
 
+    // Auction House Management Methods
     private void auctionHouseManagement() {
         System.out.println("-------------------------");
         System.out.println("Auction House Management:");
@@ -1565,7 +1551,6 @@ public class Console {
                 auctionHouseManagement();
         }
     }
-
     private void deleteAuctionHouse() {
         System.out.println("-------------------------");
         List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
@@ -1606,7 +1591,6 @@ public class Console {
         scanner.nextLine();
         auctionHouseManagement();
     }
-
     private void editAuctionHouse() {
         System.out.println("-------------------------");
         List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
@@ -1657,7 +1641,6 @@ public class Console {
         scanner.nextLine();
         auctionHouseManagement();
     }
-
     private void viewAllAuctionHouses() {
         List<AuctionHouse> auctionHouses = auctionHouseMapper.findAll();
         if (auctionHouses.isEmpty()) {
@@ -1674,7 +1657,6 @@ public class Console {
         scanner.nextLine();
         auctionHouseManagement();
     }
-
     private void addAuctionHouse() {
         System.out.println("-------------------------");
         System.out.println("Enter auction house name:");
@@ -1689,6 +1671,7 @@ public class Console {
         auctionHouseManagement();
     }
 
+    // Object of Interest Management Methods
     private void objectOfInterestManagement() {
         System.out.println("-------------------------");
         System.out.println("Object of Interest Management:");
@@ -1711,7 +1694,7 @@ public class Console {
                 deleteObjectOfInterest();
                 break;
             case "4":
-                viewAllObjectsOfInterest();
+                viewObjectsOfInterest();
                 break;
             case "5":
                 adminMenu();
@@ -1721,7 +1704,6 @@ public class Console {
                 objectOfInterestManagement();
         }
     }
-
     private void deleteObjectOfInterest() {
         System.out.println("-------------------------");
         List<ObjectOfInterest> objects = objectMapper.findAll();
@@ -1762,7 +1744,6 @@ public class Console {
         scanner.nextLine();
         objectOfInterestManagement();
     }
-
     private void editObjectOfInterest() {
         System.out.println("-------------------------");
         List<ObjectOfInterest> objects = objectMapper.findAll();
@@ -1830,12 +1811,18 @@ public class Console {
         scanner.nextLine();
         objectOfInterestManagement();
     }
-
-    private void viewAllObjectsOfInterest() {
+    private void viewObjectsOfInterest() {
         List<ObjectOfInterest> objects = objectMapper.findAll();
         if (objects.isEmpty()) {
             System.out.println("No objects of interest found.");
-            objectOfInterestManagement();
+            if (currentUser.getRole() == "Admin") {
+                objectOfInterestManagement();
+            } else if (currentUser.getRole() == "Client") {
+                viewInstitutionInformation();
+            } else if (currentUser.getRole() == "Expert") {
+                viewInstitutionInformation();
+            }
+
             return;
         }
         System.out.println("\nObjects of Interest:");
@@ -1845,9 +1832,14 @@ public class Console {
         }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
-        objectOfInterestManagement();
+        if (Objects.equals(currentUser.getRole(), "Admin")) {
+            objectOfInterestManagement();
+        } else if (Objects.equals(currentUser.getRole(), "Client")) {
+            viewInstitutionInformation();
+        } else if (Objects.equals(currentUser.getRole(), "Expert")) {
+            viewInstitutionInformation();
+        }
     }
-
     private void addObjectOfInterest() {
         System.out.println("-------------------------");
         System.out.println("Enter object of interest title:");
@@ -1873,6 +1865,7 @@ public class Console {
         adminMenu();
     }
 
+    // View Information Management Methods
     private void viewInstitutionInformation() {
         System.out.println("-------------------------");
         System.out.println("Institution Information:");
@@ -1907,76 +1900,44 @@ public class Console {
                 viewInstitutionInformation();
         }
     }
-
     private void viewViewings() {
         AuctionMapper auctionMapper = new AuctionMapper();
         List<Auction> auctions = auctionMapper.findAll();
         if (auctions.isEmpty()) {
             System.out.println("No viewings found.");
-            viewInstitutionInformation();
-            return;
-        }
-        System.out.println("\nViewings:");
-        for (int i = 0; i < auctions.size(); i++) {
-            Auction auction = auctions.get(i);
-            System.out.printf("%d. %s (%s)%n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person");
-            if (auction.getViewing() != null) {
-                Viewing viewing = auction.getViewing();
-                System.out.printf("   Viewing: Start Time: %s, End Time: %s%n", viewing.getStartTime(), viewing.getEndTime());
-            } else {
-                System.out.println("   No viewing scheduled.");
+            if (currentUser.getRole() == "Admin") {
+                viewingManagement();
+            } else if (currentUser.getRole() == "Client") {
+                viewInstitutionInformation();
+            } else if (currentUser.getRole() == "Expert") {
+                viewInstitutionInformation();
+                return;
             }
         }
-
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        viewInstitutionInformation();
-    }
-
-    private void viewAuctions() {
-        AuctionHouseMapper auctionMapper = new AuctionHouseMapper();
-        List<List<Auction>> auctions = auctionMapper.findAllAuctionsByAuctionHouse();
-        if (auctions.isEmpty()) {
-            System.out.println("No auctions found.");
-            viewInstitutionInformation();
-            return;
-        }
-        System.out.println("\nAuctions:");
-        for (int i = 0; i < auctions.size(); i++) {
-            List<Auction> auctionList = auctions.get(i);
-            System.out.printf("Auction House %d:%n", i + 1);
-            for (int j = 0; j < auctionList.size(); j++) {
-                Auction auction = auctionList.get(j);
-                System.out.printf("%d. %s (%s)%n", j + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person");
+            System.out.println("\nViewings:");
+            for (int i = 0; i < auctions.size(); i++) {
+                Auction auction = auctions.get(i);
+                System.out.printf("%d. %s (%s)%n", i + 1, auction.getAuctionType(), auction.getIsOnline() ? "Online" : "In-person");
+                if (auction.getViewing() != null) {
+                    Viewing viewing = auction.getViewing();
+                    System.out.printf("   Viewing: Start Time: %s, End Time: %s%n", viewing.getStartTime(), viewing.getEndTime());
+                } else {
+                    System.out.println("   No viewing scheduled.");
+                }
             }
-        }
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        viewInstitutionInformation();
-    }
 
-    private void viewObjectsOfInterest() {
-        InstitutionMapper institutionMapper = new InstitutionMapper();
-        List<List<ObjectOfInterest>> objects = institutionMapper.findAllObjectsByInstitution();
-        if (objects.isEmpty()) {
-            System.out.println("No objects of interest found.");
-            viewInstitutionInformation();
-            return;
-        }
-        System.out.println("\nObjects of Interest:");
-        for (int i = 0; i < objects.size(); i++) {
-            List<ObjectOfInterest> objectList = objects.get(i);
-            System.out.printf("Institution %d:%n", i + 1);
-            for (int j = 0; j < objectList.size(); j++) {
-                ObjectOfInterest object = objectList.get(j);
-                System.out.printf("%d. %s (%s)%n", j + 1, object.getTitle(), object.getType());
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            if (currentUser.getRole() == "Admin") {
+                viewingManagement();
+            } else if (currentUser.getRole() == "Client") {
+                viewInstitutionInformation();
+            } else if (currentUser.getRole() == "Expert") {
+                viewInstitutionInformation();
             }
-        }
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        viewInstitutionInformation();
     }
 
+    // User Management Methods
     private void userManagement() {
         System.out.println("-------------------------");
         System.out.println("User Management:");
@@ -2005,7 +1966,6 @@ public class Console {
                 userManagement();
         }
     }
-
     private void viewAllUsers() {
         List<User> users = userMapper.findNonAdministrators();
 
@@ -2027,6 +1987,7 @@ public class Console {
 
     }
 
+    // Client Management Methods
     private void clientManagement() {
         System.out.println("-------------------------");
         System.out.println("Client Management:");
@@ -2059,7 +2020,6 @@ public class Console {
                 clientManagement();
         }
     }
-
     private void approveClient() {
         List<Client> pendingClients = userMapper.findNonApprovedClients();
 
@@ -2120,7 +2080,6 @@ public class Console {
             }
         }
     }
-
     private void revokeClient(){
         List<Client> approvedClients = userMapper.findApprovedClients();
 
@@ -2182,7 +2141,6 @@ public class Console {
         }
 
     }
-
     private void editClient() {
         List<Client> clients = userMapper.findClients();
 
@@ -2274,7 +2232,6 @@ public class Console {
             }
         }
     }
-
     private void deleteClient() {
         List<Client> clients = userMapper.findClients();
 
@@ -2341,6 +2298,7 @@ public class Console {
         }
     }
 
+    // Expert Management Methods
     private void expertManagement() {
         System.out.println("-------------------------");
         System.out.println("Expert Management:");
@@ -2413,7 +2371,6 @@ public class Console {
                 expertManagement();
         }
     }
-
     private void manageExpertAvailability(Expert expert) {
         System.out.println("----------------------------");
         System.out.println("Manage Expert Availability:");
@@ -2449,7 +2406,6 @@ public class Console {
                 manageExpertAvailability(expert);
         }
     }
-
     private void deleteAvailability(Expert expert) {
         System.out.println("----------------------------");
         System.out.println("Delete Availability:");
@@ -2488,7 +2444,6 @@ public class Console {
         System.out.println("Availability deleted successfully.");
         manageExpertAvailability(expert);
     }
-
     private void editAvailability(Expert expert) {
         System.out.println("----------------------------");
         System.out.println("Edit Availability:");
@@ -2544,7 +2499,6 @@ public class Console {
         System.out.println("Availability updated successfully.");
         manageExpertAvailability(expert);
     }
-
     private void addAvailability(Expert expert) {
         System.out.println("----------------------------");
         System.out.println("Add Availability:");
@@ -2575,7 +2529,6 @@ public class Console {
         System.out.println("Availability added successfully.");
         manageExpertAvailability(expert);
     }
-
     private void viewAvailability(Expert expert) {
         System.out.println("----------------------------");
         System.out.println("View Availability:");
@@ -2593,7 +2546,6 @@ public class Console {
         scanner.nextLine();
         manageExpertAvailability(expert);
     }
-
     private void viewAllExperts() {
         List<Expert> experts = userMapper.findExperts();
 
@@ -2613,7 +2565,6 @@ public class Console {
         scanner.nextLine();
         expertManagement();
     }
-
     private void deleteExpert() {
         List<Expert> experts = userMapper.findExperts();
 
@@ -2679,7 +2630,6 @@ public class Console {
             }
         }
     }
-
     private void editExpert() {
         List<Expert> experts = userMapper.findExperts();
 

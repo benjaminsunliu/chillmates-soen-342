@@ -16,7 +16,7 @@ public class Administrator extends User {
 
     @Override
     public String getRole() {
-        return "Administrator";
+        return "Admin";
     }
 
 }
