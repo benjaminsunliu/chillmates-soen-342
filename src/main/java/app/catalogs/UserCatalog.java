@@ -51,13 +51,10 @@ public class UserCatalog {
         return null;
     }
 
-    public boolean isEmailTaken(String email){
+    public boolean verifyDupe(String email){
         return this.findByEmail(email) != null;
     }
 
-    public boolean verifyDupe(String email){
-        return this.isEmailTaken(email);
-    }
 
     public User createUser(String email, String password, String affiliation, String intent, boolean Status){
         User user = new Client(email, password, affiliation, intent, Status);

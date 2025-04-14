@@ -75,4 +75,14 @@ public class UserMapper extends DataMapper<User>{
         return query.getResultList();
     }
 
+    public boolean isEmailTaken(String email) {
+        try{
+            List<User> users = findAll();
+            userCatalog.setUsers(users);
+            return userCatalog.verifyDupe(email);
+        }catch (NoResultException e){
+            return false;
+        }
+    }
+
 }

@@ -149,7 +149,7 @@ public class Console {
         System.out.println("Enter your email:");
         String email = scanner.nextLine().trim();
 
-        if (userMapper.findByEmail(email) != null) {
+        if (userMapper.isEmailTaken(email)) {
             System.out.println("Email already in use. Please try logging in or using a different email.");
             mainMenu();
             return;

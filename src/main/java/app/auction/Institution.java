@@ -10,7 +10,6 @@ public class Institution {
     private String name;
 
     @OneToMany
-    @JoinColumn(name = "institution_id")
     private List<User> users;
 
     @OneToMany
