@@ -50,6 +50,13 @@ public class DBSeeder {
         userMapper.create(expert2);
         userMapper.create(client2);
 
+        institution1.addUser(admin);
+        institution1.addUser(expert);
+        institution1.addUser(client);
+        institution1.addUser(expert2);
+        institution1.addUser(client2);
+        institutionMapper.update(institution1);
+
         availabilityMapper.create(expert.getAvailability());
         availabilityMapper.create(expert2.getAvailability());
         Availability availability = expert.getAvailability();
