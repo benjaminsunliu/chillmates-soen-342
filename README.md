@@ -7,6 +7,9 @@
 - **Jordan YEH**  
   Student ID: 40283075
 
+### Demo
+https://youtu.be/xoJy-J2NHyk?si=KeWBjbWkDpivaven
+
 ### Design Patterns Used:
 - **Singleton**: Used for Catalogs to ensure only one instance of each catalog exists.
 - **Data Mapper**: Used to map data between the database and the application.
@@ -31,7 +34,7 @@ It supports three roles:
 - **Expert**: Can manage availability and accept/cancel service requests
 - **Client**: Can view and create service requests based on availability
 
-##  Features
+###  Features
 
 - **Role-based login & registration**
 - **Expert availability & time slot management**
@@ -42,7 +45,7 @@ It supports three roles:
 
 ---
 
-##  Technologies Used
+###  Technologies Used
 
 - Java 17+
 - JPA (Jakarta Persistence API)
@@ -50,7 +53,7 @@ It supports three roles:
 - H2 / other compatible RDBMS (via `persistence.xml`)
 - Console-based UI
 
-##  Running the Project
+###  Running the Project
 
 ###  Prerequisites
 
