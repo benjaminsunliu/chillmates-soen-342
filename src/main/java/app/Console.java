@@ -1479,7 +1479,6 @@ public class Console {
             }
         }
         TimeSlot timeSlot = new TimeSlot(startDateTime, endDateTime);
-
         Auction auction = new Auction(auctionType, selectedAuctionHouse, isOnline, timeSlot, selectedObject);
         selectedObject.setAuction(auction);
         auctionMapper.create(auction);

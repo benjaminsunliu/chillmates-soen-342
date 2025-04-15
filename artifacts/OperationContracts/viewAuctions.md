@@ -2,7 +2,7 @@
 
 - **Contract** : View Auctions
 - **Operation**: viewAllAuctions()
-- **Cross reference(s)**: Client's view auctions use case
+- **Cross reference(s)**: View Institution Information use case
 - **Preconditions**:
     - User must be logged into the system
 - **Postconditions**:

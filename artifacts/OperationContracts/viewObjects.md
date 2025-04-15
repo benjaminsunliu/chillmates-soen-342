@@ -2,7 +2,7 @@
 
 - **Contract** : viewObjects
 - **Operation**: viewObjects()
-- **Cross reference(s)**: Use Case View Objects
+- **Cross reference(s)**: Use Case View Institution Information
 - **Preconditions**:
     - User must be logged into the system
 - **Postconditions**:
