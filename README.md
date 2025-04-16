@@ -19,6 +19,8 @@ https://youtu.be/xoJy-J2NHyk?si=KeWBjbWkDpivaven
 - **Controller**: Used in Console
 - **Pure Fabrication**: Used for in our mappers since they are not part of the domain
 - **Table-per-class Inheritance**: Used for users
+- **Unit of Work**: Used to update database with changes
+- **Table Data Gateway**: Used for DB
 
 ### Architecture:
 - **Console Application**: The application is a console-based application that interacts with the user through the command line.
