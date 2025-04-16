@@ -14,6 +14,11 @@ https://youtu.be/xoJy-J2NHyk?si=KeWBjbWkDpivaven
 - **Singleton**: Used for Catalogs to ensure only one instance of each catalog exists.
 - **Data Mapper**: Used to map data between the database and the application.
 - **Layered Architecture**: The application is structured into layers, separating concerns and improving maintainability.
+- **Information Expert**: Used in classes that have information about others
+- **Creator**: Used when creating instances 
+- **Controller**: Used in Console
+- **Pure Fabrication**: Used for in our mappers since they are not part of the domain
+- **Table-per-class Inheritance**: Used for users
 
 ### Architecture:
 - **Console Application**: The application is a console-based application that interacts with the user through the command line.
